@@ -114,8 +114,6 @@ fn main() {
         .collect::<Vec<HashMap<String, Router>>>();
     pb.finish_with_message("done");
 
-    // println!("Voici tout lol: {:?}", all_routers_sel_tmsp);
-
     let analyze_function = match args.analyze_function.as_ref() {
         "nb-nodes" => nb_router_evolution,
         "nb-links" => nb_links_evolution,

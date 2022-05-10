@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 structopt = "0.3.26"
 chrono = "0.4.19"
+serde_yaml = "0.8.24"

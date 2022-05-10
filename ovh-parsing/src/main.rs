@@ -1,8 +1,5 @@
-use chrono::prelude::NaiveDateTime;
-use std::{
-    fs::{self},
-    path::PathBuf,
-};
+use ovh_parsing::{FileMetadata, parse_yaml};
+use std::{fs, path::PathBuf};
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -11,38 +8,11 @@ struct Cli {
     directory_path: String,
 }
 
-#[derive(Debug)]
-struct FileMetadata {
-    filepath: String,
-    timestamp: NaiveDateTime,
-}
-
-impl FileMetadata {
-    fn path_to_file_metadata(pathbuf: &PathBuf) -> Option<FileMetadata> {
-        let timestamp_str = match pathbuf.file_name() {
-            Some(filename) => match filename.to_str() {
-                Some(filename_str) => filename_str,
-                None => return None,
-            },
-            None => return None,
-        }
-        .split(&['_', '.'][..])
-        .collect::<Vec<&str>>()[1];
-
-        let timestamp = timestamp_str.parse::<i64>().unwrap();
-
-        Some(FileMetadata {
-            filepath: pathbuf.to_str().unwrap().to_string(),
-            timestamp: NaiveDateTime::from_timestamp(timestamp, 0),
-        })
-    }
-}
-
 /// Returns a Vec of indexes of the files one should take given the `step`
 /// TODO: use an enum to be able to separate using days etc...
 fn get_by_day_step(files: &[FileMetadata], step: i64) -> Vec<usize> {
     let mut output: Vec<usize> = Vec::with_capacity((files.len() as i64 / step + 1) as usize);
-    
+
     // Init: take first file
     let mut last_in = &files[0];
     for (idx, f) in files.iter().enumerate() {
@@ -53,6 +23,10 @@ fn get_by_day_step(files: &[FileMetadata], step: i64) -> Vec<usize> {
     }
 
     output
+}
+
+fn get_vec_values_from_idxs<'a, T>(vec: &'a [T], idxs: &[usize]) -> Vec<&'a T> {
+    idxs.iter().map(|&i| &vec[i]).collect()
 }
 
 fn main() {
@@ -80,5 +54,13 @@ fn main() {
     files.sort_by(|a, b| a.timestamp.partial_cmp(&b.timestamp).unwrap());
 
     let files_every_two_days = get_by_day_step(&files, 2);
-    println!("Size total: {total}, size every two: {two}", total=files.len(), two=files_every_two_days.len());
+    println!(
+        "Size total: {total}, size every two: {two}",
+        total = files.len(),
+        two = files_every_two_days.len()
+    );
+
+    // Test to see if we can have the router object
+    let router = parse_yaml(&files[0].filepath);
+    println!("Voici le routeur: {:?}", router[0]);
 }

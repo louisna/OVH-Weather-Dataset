@@ -1,14 +1,15 @@
 use chrono::Duration;
 use indicatif::ProgressBar;
 use ovh_parsing::{parse_yaml, FileMetadata, Router};
-use std::{fs, path::PathBuf};
+use std::{collections::HashMap, fs, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::basic_analyzis::nb_router_evolution;
+use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution};
 
 mod basic_analyzis;
 
 const UNIT_STEP: &[&str] = &["all", "hour", "day"];
+const ANALYZE_FUNCTION: &[&str] = &["nb-nodes", "nb-links"];
 
 #[derive(StructOpt)]
 struct Cli {
@@ -23,6 +24,12 @@ struct Cli {
     /// Output csv path
     #[structopt(short = "o", default_value = "output.csv")]
     output_csv: String,
+    #[structopt(
+        short = "t",
+        possible_values(ANALYZE_FUNCTION),
+        default_value = "nb-nodes"
+    )]
+    analyze_function: String,
 }
 
 /// Returns a Vec of indexes of the files one should take given the `step`
@@ -104,11 +111,18 @@ fn main() {
             pb.inc(1);
             parse_yaml(&x.filepath)
         })
-        .collect::<Vec<Vec<Router>>>();
+        .collect::<Vec<HashMap<String, Router>>>();
     pb.finish_with_message("done");
+
     // println!("Voici tout lol: {:?}", all_routers_sel_tmsp);
 
-    match nb_router_evolution(&all_routers_sel_tmsp, &args.output_csv) {
+    let analyze_function = match args.analyze_function.as_ref() {
+        "nb-nodes" => nb_router_evolution,
+        "nb-links" => nb_links_evolution,
+        _ => panic!("Unknown analyze function"),
+    };
+
+    match analyze_function(&all_routers_sel_tmsp, &files_selected, &args.output_csv) {
         Ok(_) => println!("Ok, it worked!"),
         Err(e) => println!("Error when using the data: {}", e),
     };

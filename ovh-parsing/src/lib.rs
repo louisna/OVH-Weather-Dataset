@@ -1,8 +1,6 @@
 use chrono::prelude::NaiveDateTime;
-use std::{
-    path::Path, collections::HashMap,
-};
-use serde_yaml::{from_reader, Value, from_str};
+use serde_yaml::{from_reader, from_str, Value};
+use std::{collections::HashMap, path::Path};
 
 #[derive(Debug)]
 pub struct FileMetadata {
@@ -33,22 +31,22 @@ impl FileMetadata {
 
 #[derive(Debug)]
 pub struct Link {
-    label: String,
-    load: u32,
+    pub label: String,
+    pub load: u32,
 }
 
 #[derive(Debug)]
 pub struct Router {
-    name: String,
-    peers: HashMap<String, Vec<Link>>,
+    pub name: String,
+    pub peers: HashMap<String, Vec<Link>>,
 }
 
 /// TODO: this function needs to be refactored, because it uses
 /// my *very few* skills in Rust
-pub fn parse_yaml(filepath: &str) -> Vec<Router> {
+pub fn parse_yaml(filepath: &str) -> HashMap<String, Router> {
     let fd = std::fs::File::open(filepath).unwrap();
     let document: Value = from_reader(fd).unwrap();
-    let mut routers: Vec<Router> = Vec::new();
+    let mut routers: HashMap<String, Router> = HashMap::new();
     for router in document.as_mapping().unwrap() {
         let router_name = router.0.as_str().unwrap();
         let m1 = router.1.as_mapping().unwrap();
@@ -65,25 +63,32 @@ pub fn parse_yaml(filepath: &str) -> Vec<Router> {
             for link in s0 {
                 let label = link.get(&k_label).unwrap().as_str().unwrap();
                 let load = link.get(&k_load).unwrap().as_u64().unwrap();
-                let peer = match link.get(&k_peer) {  //p.as_str().unwrap(),
+                let peer = match link.get(&k_peer) {
+                    //p.as_str().unwrap(),
                     Some(p) => match p.as_str() {
                         Some(n) => n,
                         None => {
                             println!("Does not work: {}, {:?}", filepath, p);
                             panic!("Error");
                         }
-                    }
+                    },
                     None => {
                         println!("Error in file {}", filepath);
                         panic!("Problem");
                     }
                 };
-                let link_obj = Link { label: label.to_string(), load: load as u32 };
-                r.peers.entry(peer.to_string()).or_insert_with(Vec::new).push(link_obj);
+                let link_obj = Link {
+                    label: label.to_string(),
+                    load: load as u32,
+                };
+                r.peers
+                    .entry(peer.to_string())
+                    .or_insert_with(Vec::new)
+                    .push(link_obj);
             }
         }
         // Finally add router to the list of all routers
-        routers.push(r);
+        routers.insert(r.name.to_owned(), r);
     }
     routers
 }

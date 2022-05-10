@@ -13,14 +13,14 @@ fn write_in_csv<T: Serialize>(
         .has_headers(false)
         .from_path(filepath)?;
 
-    wrt.serialize(values)?;
-    wrt.serialize(
-        files
+        wrt.serialize(
+            files
             .iter()
             .map(|file| file.timestamp.timestamp())
             .collect::<Vec<i64>>(),
-    )?;
-
+        )?;
+    wrt.serialize(values)?;
+        
     Ok(())
 }
 

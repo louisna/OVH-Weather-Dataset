@@ -1,8 +1,12 @@
 use chrono::Duration;
 use indicatif::ProgressBar;
-use ovh_parsing::{parse_yaml, FileMetadata};
+use ovh_parsing::{parse_yaml, FileMetadata, Router};
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
+
+use crate::basic_analyzis::nb_router_evolution;
+
+mod basic_analyzis;
 
 const UNIT_STEP: &[&str] = &["all", "hour", "day"];
 
@@ -16,6 +20,9 @@ struct Cli {
     /// Step value to skip files with unit `unit_step`
     #[structopt(short = "s", default_value = "1")]
     step: i64,
+    /// Output csv path
+    #[structopt(short = "o", default_value = "output.csv")]
+    output_csv: String,
 }
 
 /// Returns a Vec of indexes of the files one should take given the `step`
@@ -91,10 +98,18 @@ fn main() {
     let files_selected = get_vec_values_from_idxs(&files, &idxs_selected);
 
     let pb = ProgressBar::new(files_selected.len() as u64);
-    let all_routers_sel_tmsp = files_selected.iter().map(|&x| {
-        pb.inc(1);
-        parse_yaml(&x.filepath)
-    });
+    let all_routers_sel_tmsp = files_selected
+        .iter()
+        .map(|&x| {
+            pb.inc(1);
+            parse_yaml(&x.filepath)
+        })
+        .collect::<Vec<Vec<Router>>>();
     pb.finish_with_message("done");
     // println!("Voici tout lol: {:?}", all_routers_sel_tmsp);
+
+    match nb_router_evolution(&all_routers_sel_tmsp, &args.output_csv) {
+        Ok(_) => println!("Ok, it worked!"),
+        Err(e) => println!("Error when using the data: {}", e),
+    };
 }

@@ -1,6 +1,6 @@
 use chrono::prelude::NaiveDateTime;
 use std::{
-    path::PathBuf, collections::HashMap,
+    path::Path, collections::HashMap,
 };
 use serde_yaml::{from_reader, Value, from_str};
 
@@ -11,7 +11,7 @@ pub struct FileMetadata {
 }
 
 impl FileMetadata {
-    pub fn path_to_file_metadata(pathbuf: &PathBuf) -> Option<FileMetadata> {
+    pub fn path_to_file_metadata(pathbuf: &Path) -> Option<FileMetadata> {
         let timestamp_str = match pathbuf.file_name() {
             Some(filename) => match filename.to_str() {
                 Some(filename_str) => filename_str,
@@ -79,7 +79,7 @@ pub fn parse_yaml(filepath: &str) -> Vec<Router> {
                     }
                 };
                 let link_obj = Link { label: label.to_string(), load: load as u32 };
-                r.peers.entry(peer.to_string()).or_insert(Vec::new()).push(link_obj);
+                r.peers.entry(peer.to_string()).or_insert_with(Vec::new).push(link_obj);
             }
         }
         // Finally add router to the list of all routers

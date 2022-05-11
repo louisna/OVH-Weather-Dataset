@@ -1,6 +1,6 @@
 use chrono::{Duration, NaiveDateTime};
 use indicatif::ProgressBar;
-use ovh_parsing::{parse_yaml, FileMetadata, Router};
+use ovh_parsing::{parse_yaml, FileMetadata, Router, OvhData};
 use std::{collections::HashMap, fs, path::PathBuf};
 use structopt::StructOpt;
 
@@ -138,7 +138,7 @@ fn main() {
             pb.inc(1);
             parse_yaml(&x.filepath)
         })
-        .collect::<Vec<HashMap<String, Router>>>();
+        .collect::<Vec<OvhData>>();
     pb.finish_with_message("done");
 
     let analyze_function = match args.analyze_function.as_ref() {

@@ -41,9 +41,44 @@ pub struct Router {
     pub peers: HashMap<String, Vec<Link>>,
 }
 
+impl Router {
+    pub fn is_external(&self) -> bool {
+        self.name.to_uppercase() == self.name
+    }
+
+    pub fn get_external_links(&self) -> Option<Vec<&Vec<Link>>> {
+        if self.is_external() {
+            return None;
+        }
+        Some(self.peers.iter().filter(
+            |(peer_name, _)| &&peer_name.to_uppercase() == peer_name
+        ).map(|(_, links)| links).collect::<Vec<&Vec<Link>>>())
+    }
+}
+
+pub struct OvhData {
+    pub data: HashMap<String, Router>,
+}
+
+impl OvhData {
+    pub fn get_peering_routers(&self) -> Vec<&Router> {
+        self.data.iter().filter(
+            |(_, router)| router.is_external()
+        ).map(|(_, router)| router)
+        .collect::<Vec<&Router>>()
+    }
+
+    pub fn get_internal_routers(&self) -> Vec<&Router> {
+        self.data.iter().filter(
+            |(_, router)| !router.is_external()
+        ).map(|(_, router)| router)
+        .collect::<Vec<&Router>>()
+    }
+}
+
 /// TODO: this function needs to be refactored, because it uses
 /// my *very few* skills in Rust
-pub fn parse_yaml(filepath: &str) -> HashMap<String, Router> {
+pub fn parse_yaml(filepath: &str) -> OvhData {
     let fd = std::fs::File::open(filepath).unwrap();
     let document: Value = from_reader(fd).unwrap();
     let mut routers: HashMap<String, Router> = HashMap::new();
@@ -90,5 +125,5 @@ pub fn parse_yaml(filepath: &str) -> HashMap<String, Router> {
         // Finally add router to the list of all routers
         routers.insert(r.name.to_owned(), r);
     }
-    routers
+    OvhData {data: routers}
 }

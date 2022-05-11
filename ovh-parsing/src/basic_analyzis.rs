@@ -1,7 +1,6 @@
 use csv::WriterBuilder;
-use ovh_parsing::{FileMetadata, Router};
+use ovh_parsing::{FileMetadata, Router, OvhData};
 use serde::Serialize;
-use std::collections::HashMap;
 use std::error::Error;
 use std::iter::Iterator;
 
@@ -18,13 +17,13 @@ fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), Box<
 }
 
 pub fn nb_router_evolution(
-    values: &[HashMap<String, Router>],
+    values: &[OvhData],
     files: &[&FileMetadata],
     output_csv: &str,
 ) -> Result<(), Box<dyn Error>> {
     let res = values
         .iter()
-        .map(|one_timestamp| one_timestamp.len())
+        .map(|one_timestamp| one_timestamp.data.len())
         .collect::<Vec<usize>>();
 
     let serialized = res
@@ -36,8 +35,9 @@ pub fn nb_router_evolution(
     write_in_csv(serialized, output_csv)
 }
 
-fn compute_nb_links(one_timestamp: &HashMap<String, Router>) -> usize {
+fn compute_nb_links(one_timestamp: &OvhData) -> usize {
     one_timestamp
+        .data
         .values()
         .map(|router| {
             router
@@ -51,7 +51,7 @@ fn compute_nb_links(one_timestamp: &HashMap<String, Router>) -> usize {
 }
 
 pub fn nb_links_evolution(
-    values: &[HashMap<String, Router>],
+    values: &[OvhData],
     files: &[&FileMetadata],
     output_csv: &str,
 ) -> Result<(), Box<dyn Error>> {
@@ -67,7 +67,7 @@ pub fn nb_links_evolution(
 }
 
 pub fn node_degree_evolution(
-    values: &[HashMap<String, Router>],
+    values: &[OvhData],
     files: &[&FileMetadata],
     output_csv: &str,
 ) -> Result<(), Box<dyn Error>> {
@@ -75,6 +75,7 @@ pub fn node_degree_evolution(
         .iter()
         .map(|one_timestamp| {
             one_timestamp
+                .data
                 .iter()
                 .map(|(_, router)| router.peers.len())
                 .collect::<Vec<usize>>()
@@ -95,6 +96,7 @@ pub fn node_degree_evolution(
 mod tests {
     use super::*;
     use ovh_parsing::Link;
+    use std::collections::HashMap;
 
     #[test]
     fn test_compute_nb_links() {
@@ -102,7 +104,7 @@ mod tests {
         assert_eq!(compute_nb_links(&square), 6);
     }
 
-    fn construct_square_graph() -> HashMap<String, Router> {
+    fn construct_square_graph() -> OvhData {
         let mut square: HashMap<String, Router> = HashMap::new();
 
         let mut peers: HashMap<String, Vec<Link>> = HashMap::new();
@@ -221,6 +223,6 @@ mod tests {
             },
         );
 
-        square
+        OvhData { data: square}
     }
 }

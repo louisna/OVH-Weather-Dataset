@@ -86,14 +86,14 @@ impl Router {
     }
 
     pub fn get_links_load_with(&self, other: &str) -> Option<Vec<u32>> {
-        match self.peers.get(other) {
-            Some(peer) => Some(peer.iter().map(|link| link.load).collect()),
-            None => None,
-        }
+        self.peers
+            .get(other)
+            .map(|peer| peer.iter().map(|link| link.load).collect())
     }
 }
 
 pub struct OvhData {
+    pub timestamp: NaiveDateTime,
     pub data: HashMap<String, Router>,
 }
 
@@ -136,7 +136,7 @@ impl OvhData {
 
 /// TODO: this function needs to be refactored, because it uses
 /// my *very few* skills in Rust
-pub fn parse_yaml(filepath: &str) -> OvhData {
+pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> OvhData {
     let fd = std::fs::File::open(filepath).unwrap();
     let document: Value = from_reader(fd).unwrap();
     let mut routers: HashMap<String, Router> = HashMap::new();
@@ -183,5 +183,8 @@ pub fn parse_yaml(filepath: &str) -> OvhData {
         // Finally add router to the list of all routers
         routers.insert(r.name.to_owned(), r);
     }
-    OvhData { data: routers }
+    OvhData {
+        data: routers,
+        timestamp,
+    }
 }

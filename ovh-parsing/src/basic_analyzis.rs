@@ -81,6 +81,7 @@ pub fn node_degree_evolution(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::NaiveDateTime;
     use ovh_parsing::{Link, Router};
     use std::collections::HashMap;
 
@@ -209,6 +210,6 @@ mod tests {
             },
         );
 
-        OvhData { data: square }
+        OvhData { data: square, timestamp: NaiveDateTime::from_timestamp(1, 0) }
     }
 }

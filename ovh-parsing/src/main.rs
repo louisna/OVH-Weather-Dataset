@@ -1,12 +1,13 @@
 use chrono::Duration;
-use indicatif::ProgressBar;
-use ovh_parsing::{parse_yaml, FileMetadata, OvhData};
+// use indicatif::ProgressBar;
+use ovh_parsing::{FileMetadata, OvhData};
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
 
 use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution, node_degree_evolution};
-
+use crate::multithreading::multithread_parsing;
 mod basic_analyzis;
+mod multithreading;
 
 const UNIT_STEP: &[&str] = &["all", "hour", "day"];
 const ANALYZE_FUNCTION: &[&str] = &["nb-nodes", "nb-links", "node-degree"];
@@ -33,6 +34,9 @@ struct Cli {
         default_value = "nb-nodes"
     )]
     analyze_function: String,
+    /// Number of threads used to parse the yaml files
+    #[structopt(short = "n", default_value = "4")]
+    nb_threads: u32,
 }
 
 /// Returns a Vec of indexes of the files one should take given the `step`
@@ -131,15 +135,18 @@ fn main() {
 
     let files_selected = get_vec_values_from_idxs(&files, &idxs_selected);
 
-    let pb = ProgressBar::new(files_selected.len() as u64);
-    let all_routers_sel_tmsp = files_selected
-        .iter()
-        .map(|&x| {
-            pb.inc(1);
-            parse_yaml(&x.filepath)
-        })
-        .collect::<Vec<OvhData>>();
-    pb.finish_with_message("done");
+    // let pb = ProgressBar::new(files_selected.len() as u64);
+    // let all_routers_sel_tmsp = files_selected
+    //     .iter()
+    //     .map(|&x| {
+    //         pb.inc(1);
+    //         parse_yaml(&x.filepath, x.timestamp)
+    //     })
+    //     .collect::<Vec<OvhData>>();
+    // pb.finish_with_message("done");
+
+    let all_routers_sel_tmsp: Vec<OvhData> =
+        multithread_parsing(&files_selected, args.nb_threads as usize);
 
     let analyze_function = match args.analyze_function.as_ref() {
         "nb-nodes" => nb_router_evolution,

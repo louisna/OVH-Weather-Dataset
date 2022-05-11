@@ -1,5 +1,8 @@
 use chrono::prelude::NaiveDateTime;
+use csv::WriterBuilder;
+use serde::Serialize;
 use serde_yaml::{from_reader, from_str, Value};
+use std::error::Error;
 use std::{collections::HashMap, path::Path};
 
 #[derive(Debug)]
@@ -29,6 +32,18 @@ impl FileMetadata {
     }
 }
 
+pub fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), Box<dyn Error>> {
+    let mut wrt = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(filepath)?;
+
+    for value in values {
+        wrt.serialize(value)?;
+    }
+
+    Ok(())
+}
+
 #[derive(Debug)]
 pub struct Link {
     pub label: String,
@@ -46,13 +61,35 @@ impl Router {
         self.name.to_uppercase() == self.name
     }
 
+    pub fn has_external(&self) -> bool {
+        self.peers
+            .iter()
+            .map(|(peer_name, _)| &peer_name.to_uppercase() == peer_name)
+            .any(|x| x)
+    }
+
     pub fn get_external_links(&self) -> Option<Vec<&Vec<Link>>> {
         if self.is_external() {
             return None;
         }
-        Some(self.peers.iter().filter(
-            |(peer_name, _)| &&peer_name.to_uppercase() == peer_name
-        ).map(|(_, links)| links).collect::<Vec<&Vec<Link>>>())
+        Some(
+            self.peers
+                .iter()
+                .filter(|(peer_name, _)| &&peer_name.to_uppercase() == peer_name)
+                .map(|(_, links)| links)
+                .collect::<Vec<&Vec<Link>>>(),
+        )
+    }
+
+    pub fn get_nb_links(&self) -> i32 {
+        self.peers.values().map(|v| v.len() as i32).sum::<i32>()
+    }
+
+    pub fn get_links_load_with(&self, other: &str) -> Option<Vec<u32>> {
+        match self.peers.get(other) {
+            Some(peer) => Some(peer.iter().map(|link| link.load).collect()),
+            None => None,
+        }
     }
 }
 
@@ -62,17 +99,38 @@ pub struct OvhData {
 
 impl OvhData {
     pub fn get_peering_routers(&self) -> Vec<&Router> {
-        self.data.iter().filter(
-            |(_, router)| router.is_external()
-        ).map(|(_, router)| router)
-        .collect::<Vec<&Router>>()
+        self.data
+            .iter()
+            .filter(|(_, router)| router.is_external())
+            .map(|(_, router)| router)
+            .collect::<Vec<&Router>>()
     }
 
     pub fn get_internal_routers(&self) -> Vec<&Router> {
-        self.data.iter().filter(
-            |(_, router)| !router.is_external()
-        ).map(|(_, router)| router)
-        .collect::<Vec<&Router>>()
+        self.data
+            .iter()
+            .filter(|(_, router)| !router.is_external())
+            .map(|(_, router)| router)
+            .collect::<Vec<&Router>>()
+    }
+
+    pub fn get_border_routers(&self) -> Vec<&Router> {
+        self.data
+            .iter()
+            .filter(|(_, router)| router.has_external())
+            .map(|(_, router)| router)
+            .collect()
+    }
+
+    pub fn get_router_links_load_with(
+        &self,
+        router_name: &str,
+        peer_name: &str,
+    ) -> Option<Vec<u32>> {
+        match self.data.get(router_name) {
+            Some(router) => router.get_links_load_with(peer_name),
+            None => None,
+        }
     }
 }
 
@@ -125,5 +183,5 @@ pub fn parse_yaml(filepath: &str) -> OvhData {
         // Finally add router to the list of all routers
         routers.insert(r.name.to_owned(), r);
     }
-    OvhData {data: routers}
+    OvhData { data: routers }
 }

@@ -1,20 +1,6 @@
-use csv::WriterBuilder;
-use ovh_parsing::{FileMetadata, Router, OvhData};
-use serde::Serialize;
+use ovh_parsing::{write_in_csv, FileMetadata, OvhData};
 use std::error::Error;
 use std::iter::Iterator;
-
-fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), Box<dyn Error>> {
-    let mut wrt = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(filepath)?;
-
-    for value in values {
-        wrt.serialize(value)?;
-    }
-
-    Ok(())
-}
 
 pub fn nb_router_evolution(
     values: &[OvhData],
@@ -69,7 +55,7 @@ pub fn nb_links_evolution(
 pub fn node_degree_evolution(
     values: &[OvhData],
     files: &[&FileMetadata],
-    output_csv: &str,
+    _output_csv: &str,
 ) -> Result<(), Box<dyn Error>> {
     let res = values
         .iter()
@@ -95,7 +81,7 @@ pub fn node_degree_evolution(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ovh_parsing::Link;
+    use ovh_parsing::{Link, Router};
     use std::collections::HashMap;
 
     #[test]
@@ -223,6 +209,6 @@ mod tests {
             },
         );
 
-        OvhData { data: square}
+        OvhData { data: square }
     }
 }

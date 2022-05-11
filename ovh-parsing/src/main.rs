@@ -1,7 +1,7 @@
-use chrono::{Duration, NaiveDateTime};
+use chrono::Duration;
 use indicatif::ProgressBar;
-use ovh_parsing::{parse_yaml, FileMetadata, Router, OvhData};
-use std::{collections::HashMap, fs, path::PathBuf};
+use ovh_parsing::{parse_yaml, FileMetadata, OvhData};
+use std::{fs, path::PathBuf};
 use structopt::StructOpt;
 
 use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution, node_degree_evolution};

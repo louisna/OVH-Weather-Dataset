@@ -3,24 +3,17 @@ use ovh_parsing::{FileMetadata, Router};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::error::Error;
+use std::iter::Iterator;
 
-fn write_in_csv<T: Serialize>(
-    values: T,
-    files: &[&FileMetadata],
-    filepath: &str,
-) -> Result<(), Box<dyn Error>> {
+fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), Box<dyn Error>> {
     let mut wrt = WriterBuilder::new()
         .has_headers(false)
         .from_path(filepath)?;
 
-        wrt.serialize(
-            files
-            .iter()
-            .map(|file| file.timestamp.timestamp())
-            .collect::<Vec<i64>>(),
-        )?;
-    wrt.serialize(values)?;
-        
+    for value in values {
+        wrt.serialize(value)?;
+    }
+
     Ok(())
 }
 
@@ -34,7 +27,13 @@ pub fn nb_router_evolution(
         .map(|one_timestamp| one_timestamp.len())
         .collect::<Vec<usize>>();
 
-    write_in_csv(res, files, output_csv)
+    let serialized = res
+        .iter()
+        .zip(files)
+        .map(|(&value, &file)| (value, file.timestamp.timestamp()))
+        .collect::<Vec<(usize, i64)>>();
+
+    write_in_csv(serialized, output_csv)
 }
 
 fn compute_nb_links(one_timestamp: &HashMap<String, Router>) -> usize {
@@ -58,7 +57,38 @@ pub fn nb_links_evolution(
 ) -> Result<(), Box<dyn Error>> {
     let res = values.iter().map(compute_nb_links).collect::<Vec<usize>>();
 
-    write_in_csv(res, files, output_csv)
+    let serialized = res
+        .iter()
+        .zip(files)
+        .map(|(&value, &file)| (file.timestamp.timestamp(), value))
+        .collect::<Vec<(i64, usize)>>();
+
+    write_in_csv(serialized, output_csv)
+}
+
+pub fn node_degree_evolution(
+    values: &[HashMap<String, Router>],
+    files: &[&FileMetadata],
+    output_csv: &str,
+) -> Result<(), Box<dyn Error>> {
+    let res = values
+        .iter()
+        .map(|one_timestamp| {
+            one_timestamp
+                .iter()
+                .map(|(_, router)| router.peers.len())
+                .collect::<Vec<usize>>()
+        })
+        .collect::<Vec<Vec<usize>>>();
+
+    let _serialized = res
+        .iter()
+        .zip(files)
+        .map(|(v, &file)| (file.timestamp.timestamp(), v))
+        .collect::<Vec<(i64, &Vec<usize>)>>();
+
+    // TODO: for now impossible to parse in CSV because the number of columns vary
+    Ok(())
 }
 
 #[cfg(test)]

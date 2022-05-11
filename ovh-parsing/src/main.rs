@@ -1,15 +1,15 @@
-use chrono::Duration;
+use chrono::{Duration, NaiveDateTime};
 use indicatif::ProgressBar;
 use ovh_parsing::{parse_yaml, FileMetadata, Router};
 use std::{collections::HashMap, fs, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution};
+use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution, node_degree_evolution};
 
 mod basic_analyzis;
 
 const UNIT_STEP: &[&str] = &["all", "hour", "day"];
-const ANALYZE_FUNCTION: &[&str] = &["nb-nodes", "nb-links"];
+const ANALYZE_FUNCTION: &[&str] = &["nb-nodes", "nb-links", "node-degree"];
 
 #[derive(StructOpt)]
 struct Cli {
@@ -21,6 +21,9 @@ struct Cli {
     /// Step value to skip files with unit `unit_step`
     #[structopt(short = "s", default_value = "1")]
     step: i64,
+    /// Presice starting time of the selection, in the same unit at the `unit_step`
+    // #[structopt(short = "p")]
+    // precise_start_time: Option<String>,
     /// Output csv path
     #[structopt(short = "o", default_value = "output.csv")]
     output_csv: String,
@@ -34,7 +37,7 @@ struct Cli {
 
 /// Returns a Vec of indexes of the files one should take given the `step`
 /// TODO: use an enum to be able to separate using days etc...
-fn get_by_day_step<F>(files: &[FileMetadata], step: i64, step_function: F) -> Vec<usize>
+fn get_by_unit_step<F>(files: &[FileMetadata], step: i64, step_function: F) -> Vec<usize>
 where
     F: Fn(Duration) -> i64,
 {
@@ -42,6 +45,7 @@ where
 
     // Init: take first file
     let mut last_in = &files[0];
+    output.push(0);
     for (idx, f) in files.iter().enumerate() {
         if step_function(f.timestamp - last_in.timestamp) >= step {
             output.push(idx);
@@ -51,6 +55,29 @@ where
 
     output
 }
+
+// TODO
+/*fn get_by_unit_step_precise_time<F>(files: &[FileMetadata], step: i64, step_function: F, start_time: NaiveDateTime) -> Vec<usize>
+where
+    F: Fn(Duration) -> i64,
+{
+    let mut output: Vec<usize> = Vec::with_capacity((files.len() as i64 / step + 1) as usize);
+
+    // Find the first file that follows the `start_time` constrain
+    // TODO
+    let mut last_in = &files[0];
+    output.push(0);
+
+    for (idx, f) in files.iter().enumerate() {
+        if step_function(f.timestamp - last_in.timestamp) >= step {
+            output.push(idx);
+            last_in = f;
+        }
+    }
+
+    output
+}
+*/
 
 fn get_by_files_step(files: &[FileMetadata], step: i64) -> Vec<usize> {
     (0..files.len()).step_by(step as usize).collect()
@@ -94,7 +121,7 @@ fn main() {
 
     let idxs_selected = match args.unit_step.as_ref() {
         "all" => get_by_files_step(&files, args.step),
-        _ => get_by_day_step(&files, args.step, step_function),
+        _ => get_by_unit_step(&files, args.step, step_function),
     };
     println!(
         "Size total: {total}, size after selection: {two}",
@@ -117,6 +144,7 @@ fn main() {
     let analyze_function = match args.analyze_function.as_ref() {
         "nb-nodes" => nb_router_evolution,
         "nb-links" => nb_links_evolution,
+        "node-degree" => node_degree_evolution,
         _ => panic!("Unknown analyze function"),
     };
 

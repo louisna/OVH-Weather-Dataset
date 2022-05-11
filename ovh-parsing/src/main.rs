@@ -152,4 +152,12 @@ fn main() {
         Ok(_) => println!("Ok, it worked!"),
         Err(e) => println!("Error when using the data: {}", e),
     };
+
+    // Example of use of the external peers
+    let external_peers = all_routers_sel_tmsp[0].get_peering_routers();
+    println!("List of external peers: ");
+    for router in external_peers {
+        print!("{} ", router.name);
+    }
+    println!();
 }

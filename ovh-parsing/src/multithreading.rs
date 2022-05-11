@@ -3,6 +3,7 @@ use ovh_parsing::{parse_yaml, FileMetadata, OvhData};
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
 
+/// https://rust-lang-nursery.github.io/rust-cookbook/concurrency/threads.html
 pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<OvhData> {
     let pool = ThreadPool::new(nb_threads);
     let (tx, rx) = channel();

@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use ovh_parsing::{parse_yaml, Router, write_in_csv};
 use std::env;
 use std::error::Error;
@@ -16,7 +17,7 @@ fn main() {
         println!("Usage: {} <instance-path>", args[0]);
     }
 
-    let data = parse_yaml(&args[1]);
+    let data = parse_yaml(&args[1], NaiveDateTime::from_timestamp(100, 0));
     let data_routers = data.data.iter().map(
         |(_, v)| v
     ).collect::<Vec<&Router>>();

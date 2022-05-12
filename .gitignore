@@ -11,8 +11,3 @@ ovh-parsing/Cargo.lock
 
 # macos
 .DS_Store
-
-# Data files
-*.svg
-*.yaml
-*.csv

@@ -16,12 +16,23 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<Ex
         let timestamp = file.timestamp;
         pool.execute(move || {
             if let Some(val) = parse_yaml(&s, timestamp) {
-                let nb_nodes = val.get_nb_nodes();
-                let nb_links = val.get_nb_links();
+                let nb_nodes = val.get_nb_nodes(None);
+                let nb_nodes_ovh = val.get_nb_nodes(Some(true));
+                let nb_nodes_external = val.get_nb_nodes(Some(false));
+                let nb_links = val.get_nb_links(None);
+                let nb_links_external = val.get_nb_links(Some(false));
+                // Easier, because we should divide by two for internal links, but by 1
+                // for peering links.
+                let nb_links_ovh = nb_links - nb_links_external;
                 tx.send(ExperimentResults {
-                    nb_nodes,
-                    nb_links,
                     timestamp,
+                    nb_nodes,
+                    nb_nodes_ovh,
+                    nb_nodes_external,
+                    nb_links,
+                    nb_links_ovh,
+                    nb_links_external,
+                    // ..Default::default()  // Just in case we add other fields, the code compiles
                 })
                 .expect("Could not send data");
             }

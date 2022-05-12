@@ -48,26 +48,26 @@ def plot_node_degree_cdf(csv_files, labels):
     for data in all_data:
         bins, cdf = compute_cdf(data, nb_bins=400)
         all_bins.append(bins)
-        all_cdfs.append(cdf)
+        all_cdfs.append([1 - i for i in cdf])
         max_data = max(max_data, max(data))
     
     fig, ax = plt.subplots()
-    ax.set_ylabel("CDF")
+    ax.set_ylabel("Complementary CDF")
     ax.set_xlabel("Node degree")
     colors = ['#1f78b4', '#a6cee3','#33a02c', '#b2df8a']
     linestyles = ["-.", "--", "-"]
     for i, (bins, cdf) in enumerate(zip(all_bins, all_cdfs)):
         ax.plot(bins, cdf, label=labels[i], color=colors[i], linestyle=linestyles[i])
-    plt.legend(frameon=False, facecolor="white", edgecolor="white", framealpha=0, loc="lower right")
+    plt.legend(frameon=False, facecolor="white", edgecolor="white", framealpha=0)
     plt.tight_layout()
     ax.set_xticks(list(range(1, max_data + 1, 2)))
-    ax.set_yticks([0.0, 0.25, 0.50, 0.75, 1.0])
+    # ax.set_yticks([0.0, 0.25, 0.50, 0.75, 1.0])
     plt.savefig("../figures/node-degree_09_05.pdf")
     plt.show()
     
 
 if __name__ == "__main__":
     latexify()
-    plot_nb_evolution(["../ovh-parsing/csv/nb-nodes.csv"], labels=["EU"], ylabel="Nb routers evolution", show=False, savefig="../figures/nb-nodes-evolution.pdf")
-    plot_nb_evolution(["../ovh-parsing/csv/nb-links.csv"], labels=["EU"], ylabel="Nb Links evolution", show=False, savefig="../figures/nb-links-evolution.pdf")
-    # plot_node_degree_cdf(["../csv/static_node_degree_peers.csv", "../csv/static_node_degree_internal.csv", "../csv/static_node_degree.csv"], labels=["Peers", "OVH", "All"])
+    #plot_nb_evolution(["../ovh-parsing/csv/nb-nodes.csv"], labels=["EU"], ylabel="Nb routers evolution", show=False, savefig="../figures/nb-nodes-evolution.pdf")
+    #plot_nb_evolution(["../ovh-parsing/csv/nb-links.csv"], labels=["EU"], ylabel="Nb Links evolution", show=False, savefig="../figures/nb-links-evolution.pdf")
+    plot_node_degree_cdf(["../csv/static_node_degree_peers.csv", "../csv/static_node_degree_internal.csv", "../csv/static_node_degree.csv"], labels=["Peers", "OVH", "All"])

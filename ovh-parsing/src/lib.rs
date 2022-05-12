@@ -1,5 +1,6 @@
 use chrono::prelude::NaiveDateTime;
-use csv::WriterBuilder;
+use csv::{WriterBuilder, Writer};
+use std::fs::File;
 use serde::Serialize;
 use serde_yaml::{from_reader, from_str, Value};
 use std::error::Error;
@@ -92,6 +93,22 @@ impl Router {
     }
 }
 
+pub struct ExperimentResults {
+    pub timestamp: NaiveDateTime,
+    pub nb_nodes: i32,
+    pub nb_links: i32,
+}
+
+impl ExperimentResults {
+    pub fn write_csv_nb_nodes(&self, wrt: &mut Writer<File>) -> Result<(), csv::Error> {
+        wrt.serialize((&self.timestamp.timestamp(), self.nb_nodes))
+    }
+
+    pub fn write_csv_nb_links(&self, wrt: &mut Writer<File>) -> Result<(), csv::Error> {
+        wrt.serialize((&self.timestamp.timestamp(), self.nb_links))
+    }
+}
+
 pub struct OvhData {
     pub timestamp: NaiveDateTime,
     pub data: HashMap<String, Router>,
@@ -132,6 +149,24 @@ impl OvhData {
             None => None,
         }
     }
+
+    pub fn get_nb_nodes(&self) -> i32 {
+        self.data.len() as i32
+    }
+
+    pub fn get_nb_links(&self) -> i32 {
+        (self.data
+            .values()
+            .map(|router| {
+                router
+                    .peers
+                    .values()
+                    .map(|peering| peering.len())
+                    .sum::<usize>()
+            })
+            .sum::<usize>()
+            / 2) as i32
+    }
 }
 
 /// TODO: this function needs to be refactored, because it uses
@@ -155,7 +190,13 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> OvhData {
             let k_peer: Value = from_str("peer").unwrap();
             for link in s0 {
                 let label = link.get(&k_label).unwrap().as_str().unwrap();
-                let load = link.get(&k_load).unwrap().as_u64().unwrap();
+                let load = match link.get(&k_load) {
+                    Some(val) => val.as_u64().unwrap(),
+                    None => {
+                        println!("Voici le fichier qui merde: {}", filepath);
+                        panic!("Cannot!");
+                    }
+                };
                 let peer = match link.get(&k_peer) {
                     //p.as_str().unwrap(),
                     Some(p) => match p.as_str() {

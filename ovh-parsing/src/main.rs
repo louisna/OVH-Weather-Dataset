@@ -1,11 +1,11 @@
 use chrono::Duration;
+use csv::WriterBuilder;
 // use indicatif::ProgressBar;
 use ovh_parsing::{FileMetadata, OvhData};
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
 use std::error::Error;
 
-use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution};
 use crate::multithreading::multithread_parsing;
 mod basic_analyzis;
 mod multithreading;
@@ -27,11 +27,11 @@ struct Cli {
     // precise_start_time: Option<String>,
     /// Analyze the evolution of the number of nodes and write the result
     /// In the CSV with the path given as argument
-    #[structopt(long = "nb-nodes")]
-    nb_nodes_output_file: Option<String>,
+    #[structopt(long = "nb-nodes", default_value = "nb-nodes.csv")]
+    nb_nodes_output_file: String,
     /// Same as `a-nb-nodes` but considering the evolution of links
-    #[structopt(long = "nb-links")]
-    nb_links_output_file: Option<String>,
+    #[structopt(long = "nb-links", default_value = "nb-links.csv")]
+    nb_links_output_file: String,
     /// Number of threads used to parse the yaml files
     #[structopt(short = "n", default_value = "4")]
     nb_threads: u32,
@@ -143,25 +143,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     //     .collect::<Vec<OvhData>>();
     // pb.finish_with_message("done");
 
-    let all_routers_sel_tmsp: Vec<OvhData> =
-        multithread_parsing(&files_selected, args.nb_threads as usize);
+    let all_results =
+        multithread_parsing(&files_selected, args.nb_threads as usize, vec![&args.nb_nodes_output_file, &args.nb_links_output_file]);
 
-
-    if let Some(csv_file) = args.nb_nodes_output_file {
-        nb_router_evolution(&all_routers_sel_tmsp, &files_selected, &csv_file)?;
-    }
-
-    if let Some(csv_file) = args.nb_links_output_file {
-        nb_links_evolution(&all_routers_sel_tmsp, &files_selected, &csv_file)?;
-    }
-
-    // Example of use of the external peers
-    let external_peers = all_routers_sel_tmsp[0].get_peering_routers();
-    println!("List of external peers: ");
-    for router in external_peers {
-        print!("{} ", router.name);
-    }
-    println!();
+    // Open CSV and clean them
+    let mut wrt_nodes = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(&args.nb_nodes_output_file)?;
+    let mut wrt_links = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(&args.nb_links_output_file)?;
+    
+    all_results.iter().for_each(
+        |res| {
+            res.write_csv_nb_nodes(&mut wrt_nodes).unwrap();
+            res.write_csv_nb_links(&mut wrt_links).unwrap();
+        }
+    );
 
     Ok(())
 }

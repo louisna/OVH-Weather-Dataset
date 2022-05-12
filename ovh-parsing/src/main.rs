@@ -1,10 +1,10 @@
 use chrono::Duration;
 use csv::WriterBuilder;
 // use indicatif::ProgressBar;
-use ovh_parsing::{FileMetadata, OvhData};
+use ovh_parsing::FileMetadata;
+use std::error::Error;
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
-use std::error::Error;
 
 use crate::multithreading::multithread_parsing;
 mod basic_analyzis;
@@ -143,8 +143,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     //     .collect::<Vec<OvhData>>();
     // pb.finish_with_message("done");
 
-    let all_results =
-        multithread_parsing(&files_selected, args.nb_threads as usize, vec![&args.nb_nodes_output_file, &args.nb_links_output_file]);
+    let all_results = multithread_parsing(&files_selected, args.nb_threads as usize);
 
     // Open CSV and clean them
     let mut wrt_nodes = WriterBuilder::new()
@@ -153,13 +152,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut wrt_links = WriterBuilder::new()
         .has_headers(false)
         .from_path(&args.nb_links_output_file)?;
-    
-    all_results.iter().for_each(
-        |res| {
-            res.write_csv_nb_nodes(&mut wrt_nodes).unwrap();
-            res.write_csv_nb_links(&mut wrt_links).unwrap();
-        }
-    );
+
+    all_results.iter().for_each(|res| {
+        res.write_csv_nb_nodes(&mut wrt_nodes).unwrap();
+        res.write_csv_nb_links(&mut wrt_links).unwrap();
+    });
 
     Ok(())
 }

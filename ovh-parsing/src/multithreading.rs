@@ -1,11 +1,11 @@
 use indicatif::ProgressBar;
-use ovh_parsing::{parse_yaml, FileMetadata, ExperimentResults};
+use ovh_parsing::{parse_yaml, ExperimentResults, FileMetadata};
 use std::sync::mpsc::channel;
-use threadpool::ThreadPool;
 use std::time::Duration;
+use threadpool::ThreadPool;
 
 /// https://rust-lang-nursery.github.io/rust-cookbook/concurrency/threads.html
-pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize, output_files: Vec<&str>) -> Vec<ExperimentResults> {
+pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<ExperimentResults> {
     let pool = ThreadPool::new(nb_threads);
     let (tx, rx) = channel();
     let pb = ProgressBar::new(files.len() as u64);
@@ -18,7 +18,12 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize, output_fi
             if let Some(val) = parse_yaml(&s, timestamp) {
                 let nb_nodes = val.get_nb_nodes();
                 let nb_links = val.get_nb_links();
-                tx.send(ExperimentResults {nb_nodes, nb_links, timestamp}).expect("Could not send data");
+                tx.send(ExperimentResults {
+                    nb_nodes,
+                    nb_links,
+                    timestamp,
+                })
+                .expect("Could not send data");
             }
         })
     }

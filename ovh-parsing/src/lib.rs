@@ -1,9 +1,9 @@
 use chrono::prelude::NaiveDateTime;
-use csv::{WriterBuilder, Writer};
-use std::fs::File;
+use csv::{Writer, WriterBuilder};
 use serde::Serialize;
 use serde_yaml::{from_reader, from_str, Value};
 use std::error::Error;
+use std::fs::File;
 use std::{collections::HashMap, path::Path};
 
 #[derive(Debug)]
@@ -155,7 +155,8 @@ impl OvhData {
     }
 
     pub fn get_nb_links(&self) -> i32 {
-        (self.data
+        (self
+            .data
             .values()
             .map(|router| {
                 router

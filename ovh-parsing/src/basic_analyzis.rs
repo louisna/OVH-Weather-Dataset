@@ -2,7 +2,7 @@ use ovh_parsing::{write_in_csv, FileMetadata, OvhData};
 use std::error::Error;
 use std::iter::Iterator;
 
-pub fn nb_router_evolution(
+pub fn _nb_router_evolution(
     values: &[OvhData],
     files: &[&FileMetadata],
     output_csv: &str,
@@ -21,7 +21,7 @@ pub fn nb_router_evolution(
     write_in_csv(serialized, output_csv)
 }
 
-fn compute_nb_links(one_timestamp: &OvhData) -> usize {
+fn _compute_nb_links(one_timestamp: &OvhData) -> usize {
     one_timestamp
         .data
         .values()
@@ -36,12 +36,12 @@ fn compute_nb_links(one_timestamp: &OvhData) -> usize {
         / 2
 }
 
-pub fn nb_links_evolution(
+pub fn _nb_links_evolution(
     values: &[OvhData],
     files: &[&FileMetadata],
     output_csv: &str,
 ) -> Result<(), Box<dyn Error>> {
-    let res = values.iter().map(compute_nb_links).collect::<Vec<usize>>();
+    let res = values.iter().map(_compute_nb_links).collect::<Vec<usize>>();
 
     let serialized = res
         .iter()
@@ -88,7 +88,7 @@ mod tests {
     #[test]
     fn test_compute_nb_links() {
         let square = construct_square_graph();
-        assert_eq!(compute_nb_links(&square), 6);
+        assert_eq!(_compute_nb_links(&square), 6);
     }
 
     fn construct_square_graph() -> OvhData {
@@ -210,6 +210,9 @@ mod tests {
             },
         );
 
-        OvhData { data: square, timestamp: NaiveDateTime::from_timestamp(1, 0) }
+        OvhData {
+            data: square,
+            timestamp: NaiveDateTime::from_timestamp(1, 0),
+        }
     }
 }

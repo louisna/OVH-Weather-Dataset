@@ -6,6 +6,7 @@ import datetime
 
 import yaml
 
+
 from matplotlib import pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 import matplotlib.dates as mdates
@@ -42,7 +43,7 @@ if __name__ == "__main__":
                     intervals.append([timestamp, timestamp])
             all_intervals[data_dir] = intervals
             all_distances[data_dir] = distances
-        
+
         with open('data_time_intervals.yaml', 'w') as f:
             yaml.dump(all_intervals, f)
 
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     plt.legend(handles[::-1], labels[::-1], loc='center')
     plt.tight_layout()
     plt.savefig(f'timeline.pdf')
-    
+
     fig, ax = plt.subplots(figsize=(8,4))
     for (data_dir, distances), c in zip(all_distances.items(), colors):
         plt.plot(list(sorted(distances)), [x / len(distances) for x in range(len(distances))], label=maps[data_dir], color=c)
@@ -88,4 +89,3 @@ if __name__ == "__main__":
     plt.legend()
     plt.tight_layout()
     plt.savefig('files_distance.pdf')
-    

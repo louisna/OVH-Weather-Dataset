@@ -15,8 +15,8 @@ pub fn nb_router_evolution(
     let serialized = res
         .iter()
         .zip(files)
-        .map(|(&value, &file)| (value, file.timestamp.timestamp()))
-        .collect::<Vec<(usize, i64)>>();
+        .map(|(&value, &file)| (file.timestamp.timestamp(), value))
+        .collect::<Vec<(i64, usize)>>();
 
     write_in_csv(serialized, output_csv)
 }
@@ -52,7 +52,7 @@ pub fn nb_links_evolution(
     write_in_csv(serialized, output_csv)
 }
 
-pub fn node_degree_evolution(
+pub fn _node_degree_evolution(
     values: &[OvhData],
     files: &[&FileMetadata],
     _output_csv: &str,

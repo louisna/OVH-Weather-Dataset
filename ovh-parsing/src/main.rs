@@ -3,14 +3,14 @@ use chrono::Duration;
 use ovh_parsing::{FileMetadata, OvhData};
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
+use std::error::Error;
 
-use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution, node_degree_evolution};
+use crate::basic_analyzis::{nb_links_evolution, nb_router_evolution};
 use crate::multithreading::multithread_parsing;
 mod basic_analyzis;
 mod multithreading;
 
 const UNIT_STEP: &[&str] = &["all", "hour", "day"];
-const ANALYZE_FUNCTION: &[&str] = &["nb-nodes", "nb-links", "node-degree"];
 
 #[derive(StructOpt)]
 struct Cli {
@@ -25,15 +25,13 @@ struct Cli {
     /// Presice starting time of the selection, in the same unit at the `unit_step`
     // #[structopt(short = "p")]
     // precise_start_time: Option<String>,
-    /// Output csv path
-    #[structopt(short = "o", default_value = "output.csv")]
-    output_csv: String,
-    #[structopt(
-        short = "t",
-        possible_values(ANALYZE_FUNCTION),
-        default_value = "nb-nodes"
-    )]
-    analyze_function: String,
+    /// Analyze the evolution of the number of nodes and write the result
+    /// In the CSV with the path given as argument
+    #[structopt(long = "nb-nodes")]
+    nb_nodes_output_file: Option<String>,
+    /// Same as `a-nb-nodes` but considering the evolution of links
+    #[structopt(long = "nb-links")]
+    nb_links_output_file: Option<String>,
     /// Number of threads used to parse the yaml files
     #[structopt(short = "n", default_value = "4")]
     nb_threads: u32,
@@ -91,7 +89,7 @@ fn get_vec_values_from_idxs<'a, T>(vec: &'a [T], idxs: &[usize]) -> Vec<&'a T> {
     idxs.iter().map(|&i| &vec[i]).collect()
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::from_args();
 
     // https://stackoverflow.com/questions/58062887/filtering-files-or-directories-discovered-with-fsread-dir
@@ -148,17 +146,14 @@ fn main() {
     let all_routers_sel_tmsp: Vec<OvhData> =
         multithread_parsing(&files_selected, args.nb_threads as usize);
 
-    let analyze_function = match args.analyze_function.as_ref() {
-        "nb-nodes" => nb_router_evolution,
-        "nb-links" => nb_links_evolution,
-        "node-degree" => node_degree_evolution,
-        _ => panic!("Unknown analyze function"),
-    };
 
-    match analyze_function(&all_routers_sel_tmsp, &files_selected, &args.output_csv) {
-        Ok(_) => println!("Ok, it worked!"),
-        Err(e) => println!("Error when using the data: {}", e),
-    };
+    if let Some(csv_file) = args.nb_nodes_output_file {
+        nb_router_evolution(&all_routers_sel_tmsp, &files_selected, &csv_file)?;
+    }
+
+    if let Some(csv_file) = args.nb_links_output_file {
+        nb_links_evolution(&all_routers_sel_tmsp, &files_selected, &csv_file)?;
+    }
 
     // Example of use of the external peers
     let external_peers = all_routers_sel_tmsp[0].get_peering_routers();
@@ -167,4 +162,6 @@ fn main() {
         print!("{} ", router.name);
     }
     println!();
+
+    Ok(())
 }

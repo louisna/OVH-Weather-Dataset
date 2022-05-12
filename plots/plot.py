@@ -42,7 +42,6 @@ def plot_node_degree_cdf(csv_files, labels):
         with open(file) as fd:
             data = [int(i[0]) for i in csv.reader(fd)]
             all_data.append(data)
-    print(all_data)
     all_bins = list()
     all_cdfs = list()
     max_data = 0

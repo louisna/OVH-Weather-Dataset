@@ -11,3 +11,5 @@ ovh-parsing/Cargo.lock
 
 # macos
 .DS_Store
+
+__pycache*

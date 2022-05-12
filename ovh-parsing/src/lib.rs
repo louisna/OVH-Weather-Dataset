@@ -95,17 +95,69 @@ impl Router {
 
 pub struct ExperimentResults {
     pub timestamp: NaiveDateTime,
+
     pub nb_nodes: i32,
+    pub nb_nodes_ovh: i32,
+    pub nb_nodes_external: i32,
+
     pub nb_links: i32,
+    pub nb_links_ovh: i32,
+    pub nb_links_external: i32,
+}
+
+impl Default for ExperimentResults {
+    fn default() -> ExperimentResults {
+        ExperimentResults {
+            timestamp: NaiveDateTime::from_timestamp(0, 0),
+            nb_nodes: 0,
+            nb_nodes_ovh: 0,
+            nb_nodes_external: 0,
+            nb_links: 0,
+            nb_links_ovh: 0,
+            nb_links_external: 0,
+        }
+    }
 }
 
 impl ExperimentResults {
-    pub fn write_csv_nb_nodes(&self, wrt: &mut Writer<File>) -> Result<(), csv::Error> {
-        wrt.serialize((&self.timestamp.timestamp(), self.nb_nodes))
+    pub fn write_csv_nb_nodes(
+        &self,
+        wrt: &mut Writer<File>,
+        ovh_nodes: Option<bool>,
+    ) -> Result<(), csv::Error> {
+        wrt.serialize((
+            &self.timestamp.timestamp(),
+            match ovh_nodes {
+                Some(b) => {
+                    if b {
+                        self.nb_nodes_ovh
+                    } else {
+                        self.nb_nodes_external
+                    }
+                }
+                None => self.nb_nodes,
+            },
+        ))
     }
 
-    pub fn write_csv_nb_links(&self, wrt: &mut Writer<File>) -> Result<(), csv::Error> {
-        wrt.serialize((&self.timestamp.timestamp(), self.nb_links))
+    pub fn write_csv_nb_links(
+        &self,
+        wrt: &mut Writer<File>,
+        ovh_nodes: Option<bool>,
+    ) -> Result<(), csv::Error> {
+        wrt.serialize((
+            &self.timestamp.timestamp(),
+            match ovh_nodes {
+                Some(b) => {
+                    if b {
+                        self.nb_links_ovh
+                    } else {
+                        self.nb_links_external
+                    }
+                }
+                None => self.nb_links,
+            },
+        ))
     }
 }
 
@@ -150,14 +202,33 @@ impl OvhData {
         }
     }
 
-    pub fn get_nb_nodes(&self) -> i32 {
-        self.data.len() as i32
+    pub fn get_nb_nodes(&self, ovh_nodes: Option<bool>) -> i32 {
+        match ovh_nodes {
+            Some(b) => {
+                if b {
+                    self.get_internal_routers().len() as i32
+                } else {
+                    self.get_peering_routers().len() as i32
+                }
+            }
+            None => self.data.len() as i32,
+        }
     }
 
-    pub fn get_nb_links(&self) -> i32 {
+    pub fn get_nb_links(&self, ovh_nodes: Option<bool>) -> i32 {
         (self
             .data
             .values()
+            .filter(|router| match ovh_nodes {
+                Some(b) => {
+                    if b {
+                        !router.is_external()
+                    } else {
+                        router.is_external()
+                    }
+                }
+                None => true,
+            })
             .map(|router| {
                 router
                     .peers
@@ -166,7 +237,10 @@ impl OvhData {
                     .sum::<usize>()
             })
             .sum::<usize>()
-            / 2) as i32
+            / match ovh_nodes {
+                Some(_) => 1, //
+                None => 2,
+            }) as i32
     }
 }
 

@@ -3,6 +3,7 @@ use csv::WriterBuilder;
 // use indicatif::ProgressBar;
 use ovh_parsing::FileMetadata;
 use std::error::Error;
+use std::path::Path;
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
 
@@ -25,13 +26,8 @@ struct Cli {
     /// Presice starting time of the selection, in the same unit at the `unit_step`
     // #[structopt(short = "p")]
     // precise_start_time: Option<String>,
-    /// Analyze the evolution of the number of nodes and write the result
-    /// In the CSV with the path given as argument
-    #[structopt(long = "nb-nodes", default_value = "nb-nodes.csv")]
-    nb_nodes_output_file: String,
-    /// Same as `a-nb-nodes` but considering the evolution of links
-    #[structopt(long = "nb-links", default_value = "nb-links.csv")]
-    nb_links_output_file: String,
+    #[structopt(short = "o", default_value = "csv")]
+    output_dir: String,
     /// Number of threads used to parse the yaml files
     #[structopt(short = "n", default_value = "4")]
     nb_threads: u32,
@@ -148,14 +144,34 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Open CSV and clean them
     let mut wrt_nodes = WriterBuilder::new()
         .has_headers(false)
-        .from_path(&args.nb_nodes_output_file)?;
+        .from_path(Path::new(&args.output_dir).join("nb-nodes-all.csv"))?;
+    let mut wrt_nodes_ovh = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(Path::new(&args.output_dir).join("nb-nodes-ovh.csv"))?;
+    let mut wrt_nodes_external = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(Path::new(&args.output_dir).join("nb-nodes-external.csv"))?;
     let mut wrt_links = WriterBuilder::new()
         .has_headers(false)
-        .from_path(&args.nb_links_output_file)?;
+        .from_path(Path::new(&args.output_dir).join("nb-links-all.csv"))?;
+    let mut wrt_links_ovh = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(Path::new(&args.output_dir).join("nb-links-ovh.csv"))?;
+    let mut wrt_links_external = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(Path::new(&args.output_dir).join("nb-links-external.csv"))?;
 
     all_results.iter().for_each(|res| {
-        res.write_csv_nb_nodes(&mut wrt_nodes).unwrap();
-        res.write_csv_nb_links(&mut wrt_links).unwrap();
+        res.write_csv_nb_nodes(&mut wrt_nodes, None).unwrap();
+        res.write_csv_nb_nodes(&mut wrt_nodes_ovh, Some(true))
+            .unwrap();
+        res.write_csv_nb_nodes(&mut wrt_nodes_external, Some(false))
+            .unwrap();
+        res.write_csv_nb_links(&mut wrt_links, None).unwrap();
+        res.write_csv_nb_links(&mut wrt_links_ovh, Some(true))
+            .unwrap();
+        res.write_csv_nb_links(&mut wrt_links_external, Some(false))
+            .unwrap();
     });
 
     Ok(())

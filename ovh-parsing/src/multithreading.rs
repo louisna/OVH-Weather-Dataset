@@ -2,6 +2,7 @@ use indicatif::ProgressBar;
 use ovh_parsing::{parse_yaml, FileMetadata, ExperimentResults};
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
+use std::time::Duration;
 
 /// https://rust-lang-nursery.github.io/rust-cookbook/concurrency/threads.html
 pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize, output_files: Vec<&str>) -> Vec<ExperimentResults> {
@@ -23,9 +24,11 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize, output_fi
     }
 
     let mut output: Vec<ExperimentResults> = Vec::with_capacity(files.len());
+    let timeout = Duration::new(10, 0);
     for _ in 0..files.len() {
-        let result = rx.recv().unwrap();
-        output.push(result);
+        if let Ok(result) = rx.recv_timeout(timeout) {
+            output.push(result);
+        }
     }
     pb.finish_with_message("done");
     output.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));

@@ -17,7 +17,7 @@ fn main() {
         println!("Usage: {} <instance-path>", args[0]);
     }
 
-    let data = parse_yaml(&args[1], NaiveDateTime::from_timestamp(100, 0));
+    let data = parse_yaml(&args[1], NaiveDateTime::from_timestamp(100, 0)).unwrap();
     let data_routers = data.data.iter().map(
         |(_, v)| v
     ).collect::<Vec<&Router>>();

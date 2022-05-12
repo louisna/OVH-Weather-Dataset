@@ -171,7 +171,7 @@ impl OvhData {
 
 /// TODO: this function needs to be refactored, because it uses
 /// my *very few* skills in Rust
-pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> OvhData {
+pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
     let fd = std::fs::File::open(filepath).unwrap();
     let document: Value = from_reader(fd).unwrap();
     let mut routers: HashMap<String, Router> = HashMap::new();
@@ -191,10 +191,16 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> OvhData {
             for link in s0 {
                 let label = link.get(&k_label).unwrap().as_str().unwrap();
                 let load = match link.get(&k_load) {
-                    Some(val) => val.as_u64().unwrap(),
+                    Some(val) => match val.as_u64() {
+                        Some(v) => v,
+                        None => {
+                            println!("Voici l'autre fichier qui pose probleme: {}", filepath);
+                            return None;
+                        }
+                    },
                     None => {
                         println!("Voici le fichier qui merde: {}", filepath);
-                        panic!("Cannot!");
+                        return None;
                     }
                 };
                 let peer = match link.get(&k_peer) {
@@ -224,8 +230,8 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> OvhData {
         // Finally add router to the list of all routers
         routers.insert(r.name.to_owned(), r);
     }
-    OvhData {
+    Some(OvhData {
         data: routers,
         timestamp,
-    }
+    })
 }

@@ -10,15 +10,15 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize, output_fi
     let pb = ProgressBar::new(files.len() as u64);
 
     for file in files {
-        pb.inc(1);
         let tx = tx.clone();
         let s = file.filepath.to_owned();
         let timestamp = file.timestamp;
         pool.execute(move || {
-            let data = parse_yaml(&s, timestamp);
-            let nb_nodes = data.get_nb_nodes();
-            let nb_links = data.get_nb_links();
-            tx.send(ExperimentResults {nb_nodes, nb_links, timestamp}).expect("Could not send data");
+            if let Some(val) = parse_yaml(&s, timestamp) {
+                let nb_nodes = val.get_nb_nodes();
+                let nb_links = val.get_nb_links();
+                tx.send(ExperimentResults {nb_nodes, nb_links, timestamp}).expect("Could not send data");
+            }
         })
     }
 

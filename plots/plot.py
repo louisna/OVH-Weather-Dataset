@@ -67,6 +67,6 @@ def plot_node_degree_cdf(csv_files, labels):
 
 if __name__ == "__main__":
     latexify()
-    plot_nb_evolution(["../csv/nb-nodes-all.csv"], labels=["EU"], ylabel="Nb routers evolution", show=False, savefig="../figures/nb-nodes-evolution.pdf")
-    plot_nb_evolution(["../csv/nb-links-all.csv"], labels=["EU"], ylabel="Nb Links evolution", show=False, savefig="../figures/nb-links-evolution.pdf")
+    plot_nb_evolution(["../csv/nb-nodes-all.csv"], labels=["EU"], ylabel="Nb routers evolution", show=True, savefig="../figures/nb-nodes-evolution.pdf")
+    # plot_nb_evolution(["../csv/nb-links-all.csv"], labels=["EU"], ylabel="Nb Links evolution", show=False, savefig="../figures/nb-links-evolution.pdf")
     # plot_node_degree_cdf(["../csv/static_node_degree_peers.csv", "../csv/static_node_degree_internal.csv", "../csv/static_node_degree.csv"], labels=["Peers", "OVH", "All"])

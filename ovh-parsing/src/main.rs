@@ -147,9 +147,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, None),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, Some(true)),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, Some(false)),
     ];
 
     let all_filenames = [

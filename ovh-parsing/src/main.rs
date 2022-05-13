@@ -4,6 +4,7 @@ use csv::{Writer, WriterBuilder};
 use ovh_parsing::{ExperimentResults, FileMetadata};
 use std::error::Error;
 use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
@@ -170,14 +171,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Json parsing is a bit different
-    let all_filenames_json = ["ecmp-diffs.txt"];
+    let all_filenames_json = ["ecmp-diffs.yaml"];
 
     for filename in all_filenames_json {
         // Clean file
         let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
+        write!(&mut file_wrt, "---").unwrap();
         all_results
             .iter()
-            .for_each(|res| res.write_json_ecmp_diff(&mut file_wrt).unwrap())
+            .for_each(|res| res.write_yaml_ecmp_diff(&mut file_wrt).unwrap())
     }
 
     Ok(())

@@ -1,10 +1,12 @@
 use chrono::prelude::NaiveDateTime;
 use csv::{Writer, WriterBuilder};
 use serde::Serialize;
-use serde_yaml::{from_reader, from_str, to_string, Value};
+use serde_json::{to_string as json_to_string};
+use serde_yaml::{from_reader, from_str, Value};
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
+use std::path::PathBuf;
 use std::{cmp, collections::HashMap, path::Path};
 
 #[derive(Debug)]
@@ -166,10 +168,10 @@ impl ExperimentResults {
 
     /// TODO: this does not per see writes in a JSON format but for now it will be sufficient
     pub fn write_yaml_ecmp_diff(&self, file_wrt: &mut File) -> Result<(), std::io::Error> {
-        let mut a: HashMap<i64, &Vec<i32>> = HashMap::new();
-        a.insert(self.timestamp.timestamp(), &self.ecmp_diffs);
-        let a = to_string(&a).unwrap();
-        write!(file_wrt, "{}", &a[3..])
+        let j_value = json_to_string(&self.ecmp_diffs).unwrap();
+        let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
+
+        writeln!(file_wrt, "{}: {}", j_key, j_value)
     }
 }
 

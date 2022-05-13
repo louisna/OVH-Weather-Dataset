@@ -192,14 +192,22 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // ECMP aggregation
     let aggregated = aggregate_by_time(&all_results);
-    println!("{}", aggregated.len());
+    let ranges: &[i8; 9] = &[0, 1, 2, 3, 4, 5, 6, 7, 100];
+    let ranges_str: Vec<String> = ranges
+        .windows(2)
+        .map(|slice| format!("[{},{}[", slice[0], slice[1]))
+        .collect();
+    println!("Test debug {:?} {}", ranges_str, ranges_str[0]);
     let mut wrt_values = WriterBuilder::new()
-        .has_headers(false)
+        .has_headers(true)
         .from_path(Path::new(&args.output_dir).join("ecmp-agg-values-all.csv"))?;
     let mut wrt_total = WriterBuilder::new()
-        .has_headers(false)
+        .has_headers(true)
         .from_path(Path::new(&args.output_dir).join("ecmp-agg-total-all.csv"))?;
-    write_csv_ecmp_aggregated(&aggregated, &mut wrt_values, &mut wrt_total, None)?;
+    // Write the headers
+    wrt_values.serialize(("Time", ranges_str))?;
+    wrt_total.serialize(("Time", "Total"))?;
+    write_csv_ecmp_aggregated(&aggregated, &mut wrt_values, &mut wrt_total, None, ranges)?;
 
     Ok(())
 }

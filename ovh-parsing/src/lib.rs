@@ -1,4 +1,4 @@
-use chrono::prelude::NaiveDateTime;
+use chrono::prelude::{NaiveDate, NaiveDateTime, NaiveTime};
 use chrono::Datelike;
 use csv::{Writer, WriterBuilder};
 use serde::Serialize;
@@ -378,38 +378,69 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
     })
 }
 
-pub fn aggregate_by_time(all_data: &[ExperimentResults]) -> Vec<Vec<&ExperimentResults>> {
-    let mut aggr: Vec<Vec<&ExperimentResults>> = Vec::with_capacity(10);
-    let mut last_time_in = all_data[0].timestamp;
+pub fn aggregate_by_time(
+    all_data: &[ExperimentResults],
+) -> Vec<(NaiveDate, Vec<&ExperimentResults>)> {
+    let mut aggr: Vec<(NaiveDate, Vec<&ExperimentResults>)> = Vec::with_capacity(10);
+    let mut last_time_in = all_data[0].timestamp.date();
     let mut current_time: Vec<&ExperimentResults> = Vec::with_capacity(100);
 
-    for experiment in all_data {
-        if experiment.timestamp.date().month() == last_time_in.date().month()
-            && experiment.timestamp.date().year() == last_time_in.date().year()
+    let mut i = 0;
+    // for experiment in all_data
+    while i < all_data.len() {
+        let experiment = &all_data[i];
+        if experiment.timestamp.date().month() == last_time_in.month()
+            && experiment.timestamp.date().year() == last_time_in.year()
         {
             // Same month, aggregate
             current_time.push(experiment);
+            i += 1; // Next data, in order, same month
         } else {
-            last_time_in = experiment.timestamp;
+            // Changing the month... Add the vector in aggregated and clear the buffer
+            println!(
+                "the two dates: {:?} {:?}",
+                last_time_in,
+                experiment.timestamp.date()
+            );
             let tmp = current_time;
-            current_time = Vec::with_capacity(100);
-            aggr.push(tmp);
+            aggr.push((last_time_in, tmp));
+
+            if (experiment.timestamp.date() - last_time_in).num_days() < 33 {
+                current_time = vec![experiment]; // Add current data in a new clear buffer
+                i += 1; // Next data, in order but next month
+                last_time_in = experiment.timestamp.date();
+            } else {
+                // Oh... There is a gap in the data of more than 1 month... Need to fill the gap
+                println!("There is a gap in the months...");
+                current_time = Vec::new();
+                let mut current_year = last_time_in.year();
+                let mut current_month = last_time_in.month();
+                current_month = match current_month {
+                    12 => {
+                        current_year += 1;
+                        1
+                    }
+                    _ => current_month + 1,
+                };
+                last_time_in = NaiveDate::from_ymd(current_year, current_month, 1); // Next month
+                aggr.push((last_time_in, Vec::new()));
+            }
         }
     }
 
     if !current_time.is_empty() {
-        aggr.push(current_time);
+        aggr.push((last_time_in, current_time));
     }
 
     aggr
 }
 
 pub fn aggregate_ecmp_diff<'a>(
-    aggr: &[Vec<&'a ExperimentResults>],
+    aggr: &[(NaiveDate, Vec<&'a ExperimentResults>)],
     ovh_nodes: Option<bool>,
 ) -> Vec<Vec<&'a i8>> {
     aggr.iter()
-        .map(|one_aggr| {
+        .map(|(_, one_aggr)| {
             one_aggr
                 .iter()
                 .map(|&exp| match ovh_nodes {
@@ -424,49 +455,30 @@ pub fn aggregate_ecmp_diff<'a>(
 }
 
 pub fn write_csv_ecmp_aggregated(
-    aggr: &[Vec<&ExperimentResults>],
+    aggr: &[(NaiveDate, Vec<&ExperimentResults>)],
     wrt: &mut Writer<File>,
     wrt_total: &mut Writer<File>,
     ovh_nodes: Option<bool>,
+    ranges: &[i8],
 ) -> Result<(), csv::Error> {
     let aggr_ecmp = aggregate_ecmp_diff(aggr, ovh_nodes);
 
     for (exp_aggr, ecmp_values) in aggr.iter().zip(aggr_ecmp) {
-        let cnt_0 = ecmp_values
-            .iter()
-            .filter(|&&&v| (0..1).contains(&v))
-            .count();
-        let cnt_1 = ecmp_values
-            .iter()
-            .filter(|&&&v| (1..2).contains(&v))
-            .count();
-        let cnt_2 = ecmp_values
-            .iter()
-            .filter(|&&&v| (2..3).contains(&v))
-            .count();
-        let cnt_3 = ecmp_values
-            .iter()
-            .filter(|&&&v| (3..4).contains(&v))
-            .count();
-        let cnt_4 = ecmp_values
-            .iter()
-            .filter(|&&&v| (4..5).contains(&v))
-            .count();
-        let cnt_5 = ecmp_values
-            .iter()
-            .filter(|&&&v| (5..6).contains(&v))
-            .count();
-        let cnt_6 = ecmp_values
-            .iter()
-            .filter(|&&&v| (6..7).contains(&v))
-            .count();
-        let cnt_7 = ecmp_values.iter().filter(|&&&v| 7 <= v).count();
-
-        wrt.serialize((
-            exp_aggr[0].timestamp.timestamp(),
-            [cnt_0, cnt_1, cnt_2, cnt_3, cnt_4, cnt_5, cnt_6, cnt_7],
-        ))?;
-        wrt_total.serialize((exp_aggr[0].timestamp.timestamp(), ecmp_values.len()))?;
+        println!("ECMP values: {:?}", ecmp_values);
+        let cnts = ranges
+            .windows(2)
+            .map(|slice| {
+                if !ecmp_values.is_empty() {
+                    ecmp_values.iter().filter(|&&&v| slice.contains(&v)).count() as i32
+                } else {
+                    0
+                }
+            })
+            .collect::<Vec<i32>>();
+        println!("Result vector: {:?}", cnts);
+        let naivedatetime = NaiveDateTime::new(exp_aggr.0, NaiveTime::from_hms(0, 0, 0));
+        wrt.serialize((naivedatetime.timestamp(), &cnts))?;
+        wrt_total.serialize((naivedatetime.timestamp(), ecmp_values.len()))?;
     }
 
     Ok(())

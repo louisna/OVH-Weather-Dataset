@@ -40,8 +40,11 @@ def plot_interval_dataset(output):
     with open('../data_time_distances.yaml', 'r') as f:
         all_distances = yaml.load(f, Loader=Loader)
 
-    for (data_dir, distances), c in zip(all_distances.items(), colors):
-        plt.plot(list(sorted(distances)), [x / len(distances) for x in range(len(distances))], label=maps[data_dir], color=c, linewidth=2)
+    #style
+    lstyles = ["solid", "dotted", "dashed", "dashdotted"]
+
+    for (data_dir, distances), c, l in zip(all_distances.items(), colors, lstyles):
+        plt.plot(list(sorted(distances)), [x / len(distances) for x in range(len(distances))], label=maps[data_dir], color=c, lw=2, ls=linestyles[l])
 
     #axis labels
     plt.ylabel(latex_label('CDF'), font)
@@ -69,7 +72,7 @@ def plot_interval_dataset(output):
     #axis stuffs
     axis_aesthetic(ax)
 
-    legend(fontsize=FONT_SIZE_LEGEND, loc='lower right')
+    legend(fontsize=FONT_SIZE_LEGEND, handlelength=3, ncol=2, loc='lower right')
     ax.grid(True, color='gray', linestyle='dashed')
 
     #save figure

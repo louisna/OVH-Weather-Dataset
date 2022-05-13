@@ -1,4 +1,5 @@
 use chrono::prelude::NaiveDateTime;
+use chrono::Datelike;
 use csv::{Writer, WriterBuilder};
 use serde::Serialize;
 use serde_json::to_string as json_to_string;
@@ -95,6 +96,7 @@ impl Router {
     }
 }
 
+#[derive(Debug)]
 pub struct ExperimentResults {
     pub timestamp: NaiveDateTime,
 
@@ -106,9 +108,9 @@ pub struct ExperimentResults {
     pub nb_links_ovh: i32,
     pub nb_links_external: i32,
 
-    pub ecmp_diffs: Vec<i32>,
-    pub ecmp_diffs_ovh: Vec<i32>,
-    pub ecmp_diffs_external: Vec<i32>,
+    pub ecmp_diffs: Vec<i8>,
+    pub ecmp_diffs_ovh: Vec<i8>,
+    pub ecmp_diffs_external: Vec<i8>,
 }
 
 impl Default for ExperimentResults {
@@ -169,7 +171,6 @@ impl ExperimentResults {
         ))
     }
 
-    /// TODO: this does not per see writes in a JSON format but for now it will be sufficient
     pub fn write_yaml_ecmp_diff(
         &self,
         file_wrt: &mut File,
@@ -274,9 +275,9 @@ impl OvhData {
     /// We do *not* take into account the loads of:
     ///     - 0%: no traffic, unused link,
     ///     - 1%: assume that it represents only traffic control
-    pub fn get_ecmp_imbalance(&self, ovh_nodes: Option<bool>) -> Vec<i32> {
+    pub fn get_ecmp_imbalance(&self, ovh_nodes: Option<bool>) -> Vec<i8> {
         // I first made it using functional programming, but it is way cleaner like this
-        let mut output: Vec<i32> = Vec::with_capacity(self.data.len()); // Random initialization
+        let mut output: Vec<i8> = Vec::with_capacity(self.data.len()); // Random initialization
         for router in self.data.values().filter(|&r| match ovh_nodes {
             Some(true) => !r.is_external(),
             Some(false) => r.is_external(),
@@ -296,11 +297,11 @@ impl OvhData {
                     let min_load = filtered_links
                         .iter()
                         .fold(filtered_links[0].load, |a, b| cmp::min(a, b.load))
-                        as i32;
+                        as i8;
                     let max_load = filtered_links
                         .iter()
                         .fold(filtered_links[0].load, |a, b| cmp::max(a, b.load))
-                        as i32;
+                        as i8;
                     output.push(max_load - min_load);
                 }
             }
@@ -375,4 +376,98 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
         data: routers,
         timestamp,
     })
+}
+
+pub fn aggregate_by_time(all_data: &[ExperimentResults]) -> Vec<Vec<&ExperimentResults>> {
+    let mut aggr: Vec<Vec<&ExperimentResults>> = Vec::with_capacity(10);
+    let mut last_time_in = all_data[0].timestamp;
+    let mut current_time: Vec<&ExperimentResults> = Vec::with_capacity(100);
+
+    for experiment in all_data {
+        if experiment.timestamp.date().month() == last_time_in.date().month()
+            && experiment.timestamp.date().year() == last_time_in.date().year()
+        {
+            // Same month, aggregate
+            current_time.push(experiment);
+        } else {
+            last_time_in = experiment.timestamp;
+            let tmp = current_time;
+            current_time = Vec::with_capacity(100);
+            aggr.push(tmp);
+        }
+    }
+
+    if !current_time.is_empty() {
+        aggr.push(current_time);
+    }
+
+    aggr
+}
+
+pub fn aggregate_ecmp_diff<'a>(
+    aggr: &[Vec<&'a ExperimentResults>],
+    ovh_nodes: Option<bool>,
+) -> Vec<Vec<&'a i8>> {
+    aggr.iter()
+        .map(|one_aggr| {
+            one_aggr
+                .iter()
+                .map(|&exp| match ovh_nodes {
+                    Some(true) => &exp.ecmp_diffs_ovh,
+                    Some(false) => &exp.ecmp_diffs_external,
+                    None => &exp.ecmp_diffs,
+                })
+                .flatten()
+                .collect::<Vec<&i8>>()
+        })
+        .collect()
+}
+
+pub fn write_csv_ecmp_aggregated(
+    aggr: &[Vec<&ExperimentResults>],
+    wrt: &mut Writer<File>,
+    wrt_total: &mut Writer<File>,
+    ovh_nodes: Option<bool>,
+) -> Result<(), csv::Error> {
+    let aggr_ecmp = aggregate_ecmp_diff(aggr, ovh_nodes);
+
+    for (exp_aggr, ecmp_values) in aggr.iter().zip(aggr_ecmp) {
+        let cnt_0 = ecmp_values
+            .iter()
+            .filter(|&&&v| (0..1).contains(&v))
+            .count();
+        let cnt_1 = ecmp_values
+            .iter()
+            .filter(|&&&v| (1..2).contains(&v))
+            .count();
+        let cnt_2 = ecmp_values
+            .iter()
+            .filter(|&&&v| (2..3).contains(&v))
+            .count();
+        let cnt_3 = ecmp_values
+            .iter()
+            .filter(|&&&v| (3..4).contains(&v))
+            .count();
+        let cnt_4 = ecmp_values
+            .iter()
+            .filter(|&&&v| (4..5).contains(&v))
+            .count();
+        let cnt_5 = ecmp_values
+            .iter()
+            .filter(|&&&v| (5..6).contains(&v))
+            .count();
+        let cnt_6 = ecmp_values
+            .iter()
+            .filter(|&&&v| (6..7).contains(&v))
+            .count();
+        let cnt_7 = ecmp_values.iter().filter(|&&&v| 7 <= v).count();
+
+        wrt.serialize((
+            exp_aggr[0].timestamp.timestamp(),
+            [cnt_0, cnt_1, cnt_2, cnt_3, cnt_4, cnt_5, cnt_6, cnt_7],
+        ))?;
+        wrt_total.serialize((exp_aggr[0].timestamp.timestamp(), ecmp_values.len()))?;
+    }
+
+    Ok(())
 }

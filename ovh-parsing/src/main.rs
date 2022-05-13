@@ -1,7 +1,7 @@
 use chrono::Duration;
 use csv::{Writer, WriterBuilder};
 // use indicatif::ProgressBar;
-use ovh_parsing::{ExperimentResults, FileMetadata};
+use ovh_parsing::{aggregate_by_time, write_csv_ecmp_aggregated, ExperimentResults, FileMetadata};
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
@@ -189,6 +189,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             .iter()
             .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
     }
+
+    // ECMP aggregation
+    let aggregated = aggregate_by_time(&all_results);
+    println!("{}", aggregated.len());
+    let mut wrt_values = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(Path::new(&args.output_dir).join("ecmp-agg-values-all.csv"))?;
+    let mut wrt_total = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(Path::new(&args.output_dir).join("ecmp-agg-total-all.csv"))?;
+    write_csv_ecmp_aggregated(&aggregated, &mut wrt_values, &mut wrt_total, None)?;
 
     Ok(())
 }

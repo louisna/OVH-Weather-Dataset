@@ -1,8 +1,9 @@
 use chrono::Duration;
-use csv::WriterBuilder;
+use csv::{WriterBuilder, Writer};
 // use indicatif::ProgressBar;
-use ovh_parsing::FileMetadata;
+use ovh_parsing::{FileMetadata, ExperimentResults};
 use std::error::Error;
+use std::fs::File;
 use std::path::Path;
 use std::{fs, path::PathBuf};
 use structopt::StructOpt;
@@ -141,38 +142,45 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let all_results = multithread_parsing(&files_selected, args.nb_threads as usize);
 
-    // Open CSV and clean them
-    let mut wrt_nodes = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(Path::new(&args.output_dir).join("nb-nodes-all.csv"))?;
-    let mut wrt_nodes_ovh = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(Path::new(&args.output_dir).join("nb-nodes-ovh.csv"))?;
-    let mut wrt_nodes_external = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(Path::new(&args.output_dir).join("nb-nodes-external.csv"))?;
-    let mut wrt_links = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(Path::new(&args.output_dir).join("nb-links-all.csv"))?;
-    let mut wrt_links_ovh = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(Path::new(&args.output_dir).join("nb-links-ovh.csv"))?;
-    let mut wrt_links_external = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(Path::new(&args.output_dir).join("nb-links-external.csv"))?;
+    let all_writers = [
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
 
-    all_results.iter().for_each(|res| {
-        res.write_csv_nb_nodes(&mut wrt_nodes, None).unwrap();
-        res.write_csv_nb_nodes(&mut wrt_nodes_ovh, Some(true))
-            .unwrap();
-        res.write_csv_nb_nodes(&mut wrt_nodes_external, Some(false))
-            .unwrap();
-        res.write_csv_nb_links(&mut wrt_links, None).unwrap();
-        res.write_csv_nb_links(&mut wrt_links_ovh, Some(true))
-            .unwrap();
-        res.write_csv_nb_links(&mut wrt_links_external, Some(false))
-            .unwrap();
-    });
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
+    ];
+
+    let all_filenames = [
+        "nb-nodes-all.csv",
+        "nb-nodes-ovh.csv",
+        "nb-nodes-external.csv",
+
+        "nb-links-all.csv",
+        "nb-links-ovh.csv",
+        "nb-links-external.csv",
+    ];
+
+    for (wrt_fn, filename) in all_writers.iter().zip(all_filenames) {
+        let mut wrt = WriterBuilder::new().has_headers(false).from_path(Path::new(&args.output_dir).join(filename))?;
+        all_results.iter().for_each(
+            |res| wrt_fn(res, &mut wrt).unwrap()
+        )
+    }
+
+    // Json parsing is a bit different
+    let all_filenames_json = [
+        "ecmp-diffs.txt",
+    ];
+
+    for filename in all_filenames_json {
+        // Clean file
+        let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
+        all_results.iter().for_each(
+            |res| res.write_json_ecmp_diff(&mut file_wrt).unwrap()
+        )
+    }
 
     Ok(())
 }

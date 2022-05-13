@@ -1,10 +1,13 @@
 use chrono::prelude::NaiveDateTime;
 use csv::{Writer, WriterBuilder};
 use serde::Serialize;
+use serde_json::{json, to_string as json_to_string};
 use serde_yaml::{from_reader, from_str, Value};
 use std::error::Error;
 use std::fs::File;
-use std::{collections::HashMap, path::Path};
+use std::io::Write;
+use std::path::PathBuf;
+use std::{cmp, collections::HashMap, path::Path};
 
 #[derive(Debug)]
 pub struct FileMetadata {
@@ -103,6 +106,8 @@ pub struct ExperimentResults {
     pub nb_links: i32,
     pub nb_links_ovh: i32,
     pub nb_links_external: i32,
+
+    pub ecmp_diffs: Vec<i32>,
 }
 
 impl Default for ExperimentResults {
@@ -115,6 +120,7 @@ impl Default for ExperimentResults {
             nb_links: 0,
             nb_links_ovh: 0,
             nb_links_external: 0,
+            ecmp_diffs: Vec::new(),
         }
     }
 }
@@ -158,6 +164,14 @@ impl ExperimentResults {
                 None => self.nb_links,
             },
         ))
+    }
+
+    /// TODO: this does not per see writes in a JSON format but for now it will be sufficient
+    pub fn write_json_ecmp_diff(&self, file_wrt: &mut File) -> Result<(), std::io::Error> {
+        let j_value = json_to_string(&self.ecmp_diffs).unwrap();
+        let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
+
+        writeln!(file_wrt,"{}: {}", j_key, j_value)
     }
 }
 
@@ -241,6 +255,35 @@ impl OvhData {
                 Some(_) => 1, //
                 None => 2,
             }) as i32
+    }
+
+    /// For each router in the network, computes the ECMP imbalance,
+    /// i.e., the difference in load between all links with the same source and destination.
+    /// We do *not* take into account the loads of:
+    ///     - 0%: no traffic, unused link,
+    ///     - 1%: assume that it represents only traffic control
+    pub fn get_ecmp_imbalance(&self) -> Vec<i32> {
+        // I first made it using functional programming, but it is way cleaner like this
+        let mut output: Vec<i32> = Vec::with_capacity(self.data.len()); // Random initialization
+        for router in self.data.values() {
+            for peer_links in router.peers.values() {
+                let filtered_links: Vec<&Link> =
+                    peer_links.iter().filter(|&link| link.load > 1).collect();
+                if filtered_links.len() > 1 {
+                    let min_load = filtered_links
+                        .iter()
+                        .fold(filtered_links[0].load, |a, b| cmp::min(a, b.load))
+                        as i32;
+                    let max_load = filtered_links
+                        .iter()
+                        .fold(filtered_links[0].load, |a, b| cmp::max(a, b.load))
+                        as i32;
+                    output.push(max_load - min_load);
+                }
+            }
+        }
+
+        output
     }
 }
 

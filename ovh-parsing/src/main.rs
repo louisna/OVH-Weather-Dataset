@@ -1,7 +1,7 @@
 use chrono::Duration;
-use csv::{WriterBuilder, Writer};
+use csv::{Writer, WriterBuilder};
 // use indicatif::ProgressBar;
-use ovh_parsing::{FileMetadata, ExperimentResults};
+use ovh_parsing::{ExperimentResults, FileMetadata};
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
@@ -146,7 +146,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
-
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
@@ -156,30 +155,29 @@ fn main() -> Result<(), Box<dyn Error>> {
         "nb-nodes-all.csv",
         "nb-nodes-ovh.csv",
         "nb-nodes-external.csv",
-
         "nb-links-all.csv",
         "nb-links-ovh.csv",
         "nb-links-external.csv",
     ];
 
     for (wrt_fn, filename) in all_writers.iter().zip(all_filenames) {
-        let mut wrt = WriterBuilder::new().has_headers(false).from_path(Path::new(&args.output_dir).join(filename))?;
-        all_results.iter().for_each(
-            |res| wrt_fn(res, &mut wrt).unwrap()
-        )
+        let mut wrt = WriterBuilder::new()
+            .has_headers(false)
+            .from_path(Path::new(&args.output_dir).join(filename))?;
+        all_results
+            .iter()
+            .for_each(|res| wrt_fn(res, &mut wrt).unwrap())
     }
 
     // Json parsing is a bit different
-    let all_filenames_json = [
-        "ecmp-diffs.txt",
-    ];
+    let all_filenames_json = ["ecmp-diffs.txt"];
 
     for filename in all_filenames_json {
         // Clean file
         let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
-        all_results.iter().for_each(
-            |res| res.write_json_ecmp_diff(&mut file_wrt).unwrap()
-        )
+        all_results
+            .iter()
+            .for_each(|res| res.write_json_ecmp_diff(&mut file_wrt).unwrap())
     }
 
     Ok(())

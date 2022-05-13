@@ -34,7 +34,7 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<Ex
                     nb_links_ovh,
                     nb_links_external,
                     ecmp_diffs,
-                    ..Default::default()  // Just in case we add other fields, the code compiles
+                    // ..Default::default()  // Just in case we add other fields, the code compiles
                 })
                 .expect("Could not send data");
             }

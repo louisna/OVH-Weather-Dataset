@@ -1,12 +1,11 @@
 use chrono::prelude::NaiveDateTime;
 use csv::{Writer, WriterBuilder};
 use serde::Serialize;
-use serde_json::{json, to_string as json_to_string};
+use serde_json::{to_string as json_to_string};
 use serde_yaml::{from_reader, from_str, Value};
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
 use std::{cmp, collections::HashMap, path::Path};
 
 #[derive(Debug)]
@@ -171,7 +170,7 @@ impl ExperimentResults {
         let j_value = json_to_string(&self.ecmp_diffs).unwrap();
         let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
 
-        writeln!(file_wrt,"{}: {}", j_key, j_value)
+        writeln!(file_wrt, "{}: {}", j_key, j_value)
     }
 }
 

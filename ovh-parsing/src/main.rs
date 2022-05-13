@@ -169,15 +169,25 @@ fn main() -> Result<(), Box<dyn Error>> {
             .for_each(|res| wrt_fn(res, &mut wrt).unwrap())
     }
 
-    // Json parsing is a bit different
-    let all_filenames_json = ["ecmp-diffs.yaml"];
+    let all_writers_yaml = [
+        |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, None),
+        |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(true)),
+        |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(false)),
+    ];
 
-    for filename in all_filenames_json {
+    // Json parsing is a bit different
+    let all_filenames_yaml = [
+        "ecmp-diffs-all.yaml",
+        "ecmp-diffs-ovh.yaml",
+        "ecmp-diffs-external.yaml",
+    ];
+
+    for (wrt_fn, filename) in all_writers_yaml.iter().zip(all_filenames_yaml) {
         // Clean file
         let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
         all_results
             .iter()
-            .for_each(|res| res.write_yaml_ecmp_diff(&mut file_wrt).unwrap())
+            .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
     }
 
     Ok(())

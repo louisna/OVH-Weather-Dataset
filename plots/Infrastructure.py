@@ -5,6 +5,7 @@ Infrastructure plotting
 node degree distribution
 """
 
+from datetime import timedelta
 from Utils_Benoit import *
 
 def plot_node_degree(csv_files, labels, output):
@@ -36,7 +37,7 @@ def plot_node_degree(csv_files, labels, output):
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
-    colors = ['#1f78b4', '#a6cee3','#33a02c', '#b2df8a']
+    colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
     lstyles = ["solid", "dotted", "dashed"]
 
     for i, (bins, cdf) in enumerate(zip(all_bins, all_cdfs)):
@@ -84,12 +85,22 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
-    colors = ['#1f78b4', '#a6cee3','#33a02c', '#b2df8a']
+    colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
     lstyles = ["solid", "dotted", "dashed"]
 
     #plot
     for i, (x, y) in enumerate(zip(all_x, all_data)):
-        ax.plot(x, y, label=legend_label(labels[i]), color=colors[i], lw=2, ls=linestyles[lstyles[i]])
+        subx = []
+        suby = []
+        for (dt1, dt2), (y1, y2) in zip(zip(x[:-1], x[1:]), zip(y[:-1], y[1:])):
+            subx.append(dt1)
+            suby.append(y1)
+            if dt2 - dt1 > timedelta(hours=1):
+                ax.plot(subx, suby, color=colors[i], lw=2, ls=linestyles[lstyles[0]]) # linestyle is kept the same otherwise gaps in the data can be mixed with linestyles
+                subx = []
+                suby = []
+        if subx and suby:
+            ax.plot(subx, suby, label=legend_label(labels[i]), color=colors[i], lw=2, ls=linestyles[lstyles[0]])
 
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label(ylabel), font)

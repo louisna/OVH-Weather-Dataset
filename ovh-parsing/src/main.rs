@@ -197,7 +197,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .windows(2)
         .map(|slice| format!("[{},{}[", slice[0], slice[1]))
         .collect();
-    println!("Test debug {:?} {}", ranges_str, ranges_str[0]);
     let mut wrt_values = WriterBuilder::new()
         .has_headers(true)
         .from_path(Path::new(&args.output_dir).join("ecmp-agg-values-all.csv"))?;

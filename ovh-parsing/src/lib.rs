@@ -397,11 +397,6 @@ pub fn aggregate_by_time(
             i += 1; // Next data, in order, same month
         } else {
             // Changing the month... Add the vector in aggregated and clear the buffer
-            println!(
-                "the two dates: {:?} {:?}",
-                last_time_in,
-                experiment.timestamp.date()
-            );
             let tmp = current_time;
             aggr.push((last_time_in, tmp));
 
@@ -411,7 +406,6 @@ pub fn aggregate_by_time(
                 last_time_in = experiment.timestamp.date();
             } else {
                 // Oh... There is a gap in the data of more than 1 month... Need to fill the gap
-                println!("There is a gap in the months...");
                 current_time = Vec::new();
                 let mut current_year = last_time_in.year();
                 let mut current_month = last_time_in.month();
@@ -464,7 +458,6 @@ pub fn write_csv_ecmp_aggregated(
     let aggr_ecmp = aggregate_ecmp_diff(aggr, ovh_nodes);
 
     for (exp_aggr, ecmp_values) in aggr.iter().zip(aggr_ecmp) {
-        println!("ECMP values: {:?}", ecmp_values);
         let cnts = ranges
             .windows(2)
             .map(|slice| {
@@ -475,7 +468,6 @@ pub fn write_csv_ecmp_aggregated(
                 }
             })
             .collect::<Vec<i32>>();
-        println!("Result vector: {:?}", cnts);
         let naivedatetime = NaiveDateTime::new(exp_aggr.0, NaiveTime::from_hms(0, 0, 0));
         wrt.serialize((naivedatetime.timestamp(), &cnts))?;
         wrt_total.serialize((naivedatetime.timestamp(), ecmp_values.len()))?;

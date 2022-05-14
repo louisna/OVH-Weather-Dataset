@@ -10,8 +10,9 @@ from Utils_Benoit import *
 from matplotlib.colors import LogNorm, Normalize
 
 empty_date_label=["","","","","","","","","","","","","","","","","","","","","","","","",""]
+yticklabels_heatmap = ['[0,1[','[1,2[','[2,3[','[3,4[','[4,5[','[5,6[','[6,7[','[7,100[']
 
-def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_center=0.1, max_ylim_total=3000000):
+def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_center=0.05, max_ylim_total=3000000):
     """
     Plots ECMP imbalance in OVH through heatmap
 
@@ -21,15 +22,15 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
         output: output filename
         figsize_x: figure width (24 by default)
         figsize_y: figure height (15 by default)
-        cbar_center: color bar center point (0.1 by default)
+        cbar_center: color bar center point (0.05 by default)
         max_ylim_total: max Y axis value for the below bar plot (3000000 by default)
     """
     #load data
     dfValues = pd.read_csv(values, sep=';', skipinitialspace=True, parse_dates=['Time'])
-    dfTotal  = pd.read_csv(total, sep=';', skipinitialspace=True, parse_dates=['Time'])
+    dfTotal  = pd.read_csv(total, sep=';', skipinitialspace=True)
 
     #computes relative values
-    dfValues = dfValues[['[0,1[','[1,2[','[2,3[','[3,4[','[4,5[','[5,6[','[6,7[','[7,100[']]
+    dfValues = dfValues[yticklabels_heatmap]
     dfValues.loc[:,'[0,1[':'[7,100['] = dfValues.loc[:,'[0,1[':'[7,100['].div(dfValues.sum(axis=1), axis=0)
 
     #create subfigures
@@ -49,10 +50,12 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
 
     g = sns.heatmap(df, cbar_kws={'label': latex_label('Proportion'), "use_gridspec" : False,
                     "location":"top", "extend":"both", 'anchor':(0.2,0.2)},
-                     xticklabels=empty_date_label, #yticklabels=yticklabels_heatmap,
+                     xticklabels=empty_date_label, yticklabels=yticklabels_heatmap,
                      norm=midnorm, cmap='coolwarm', annot=False, ax=ax[0], mask=mask)#, vmin=1, vmax=np.nanmax(df))
 
-    g.set_ylabel(latex_label('ECMP Imbalance'), fontsize=FONT_SIZE)
+    ax[0].invert_yaxis()
+
+    g.set_ylabel(latex_label('ECMP Imbalance (\%age)'), fontsize=FONT_SIZE)
     sns.despine(offset=10, top=True, right=True, left=False, bottom=False)
 
     # Color bar and size of ticks
@@ -66,11 +69,12 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
     # BarPlot                 #
     ###########################
     dfTotal.plot(y='Total', kind='bar', legend=False, ax=ax[1])
+
     ax[1].semilogy()
     ax[1].set_ylim(1, max_ylim_total)
 
     axis_aesthetic(ax[1])
-    #ax[1].set_xticklabels(date_labels, rotation=45, horizontalalignment='center', fontsize=FONT_SIZE_TICKS)
+
     ax[1].set_xlabel(latex_label('Time'), font)
     ax[1].set_ylabel(latex_label("Raw Number"), font)
     ax[1].tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)

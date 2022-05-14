@@ -68,6 +68,7 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
     ###########################
     # BarPlot                 #
     ###########################
+    #got time in format YYYY-MM
     dates = [datetime.fromtimestamp(ts).strftime('%Y-%m') for ts in dfTotal['Time']]
     dfTotal['Time'] = dates
     dfTotal.index = pd.to_datetime(dfTotal.index)

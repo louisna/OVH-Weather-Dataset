@@ -139,13 +139,8 @@ impl ExperimentResults {
         wrt.serialize((
             &self.timestamp.timestamp(),
             match ovh_nodes {
-                Some(b) => {
-                    if b {
-                        self.nb_nodes_ovh
-                    } else {
-                        self.nb_nodes_external
-                    }
-                }
+                Some(true) => self.nb_nodes_ovh,
+                Some(false) => self.nb_nodes_external,
                 None => self.nb_nodes,
             },
         ))
@@ -159,13 +154,8 @@ impl ExperimentResults {
         wrt.serialize((
             &self.timestamp.timestamp(),
             match ovh_nodes {
-                Some(b) => {
-                    if b {
-                        self.nb_links_ovh
-                    } else {
-                        self.nb_links_external
-                    }
-                }
+                Some(true) => self.nb_links_ovh,
+                Some(false) => self.nb_links_external,
                 None => self.nb_links,
             },
         ))
@@ -231,13 +221,8 @@ impl OvhData {
 
     pub fn get_nb_nodes(&self, ovh_nodes: Option<bool>) -> i32 {
         match ovh_nodes {
-            Some(b) => {
-                if b {
-                    self.get_internal_routers().len() as i32
-                } else {
-                    self.get_peering_routers().len() as i32
-                }
-            }
+            Some(true) => self.get_internal_routers().len() as i32,
+            Some(false) => self.get_peering_routers().len() as i32,
             None => self.data.len() as i32,
         }
     }
@@ -247,13 +232,8 @@ impl OvhData {
             .data
             .values()
             .filter(|router| match ovh_nodes {
-                Some(b) => {
-                    if b {
-                        !router.is_external()
-                    } else {
-                        router.is_external()
-                    }
-                }
+                Some(true) => !router.is_external(),
+                Some(false) => router.is_external(),
                 None => true,
             })
             .map(|router| {

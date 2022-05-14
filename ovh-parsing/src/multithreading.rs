@@ -1,3 +1,6 @@
+// Author: Louis Navarre <louis.navarre@uclouvain.be> (UCLouvain -- INL)
+// Date: 11/05/2022
+
 use indicatif::ProgressBar;
 use ovh_parsing::{parse_yaml, ExperimentResults, FileMetadata};
 use std::sync::mpsc::channel;

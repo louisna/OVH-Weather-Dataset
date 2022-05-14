@@ -1,3 +1,6 @@
+// Author: Louis Navarre <louis.navarre@uclouvain.be> (UCLouvain -- INL)
+// Date: 10/05/2022
+
 use chrono::Duration;
 use csv::{Writer, WriterBuilder};
 // use indicatif::ProgressBar;

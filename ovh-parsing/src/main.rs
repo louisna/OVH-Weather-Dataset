@@ -32,6 +32,12 @@ struct Cli {
     /// Number of threads used to parse the yaml files
     #[structopt(short = "n", default_value = "4")]
     nb_threads: u32,
+    /// Start the parsing at the very specified timestamp
+    #[structopt(long = "start-timestamp")]
+    start_specific_timestamp: Option<i64>,
+    /// Stop the parsing at the very specified timestamp
+    #[structopt(long = "stop-timestamp")]
+    stop_timestamp: Option<i64>,
 }
 
 /// Returns a Vec of indexes of the files one should take given the `step`
@@ -55,28 +61,49 @@ where
     output
 }
 
-// TODO
-/*fn get_by_unit_step_precise_time<F>(files: &[FileMetadata], step: i64, step_function: F, start_time: NaiveDateTime) -> Vec<usize>
-where
-    F: Fn(Duration) -> i64,
-{
-    let mut output: Vec<usize> = Vec::with_capacity((files.len() as i64 / step + 1) as usize);
+fn cut_start_stop_timestamp(
+    files: &[FileMetadata],
+    start_timestamp: i64,
+    stop_timestamp: Option<i64>,
+) -> &[FileMetadata] {
+    // 1. Find the file with the timestamp `start_timestamp`
+    // TODO: find the closest if cannot find the precise one?
+    // TODO: could benefit from binary search because the array slice is sorted
+    let start_idx = match files
+        .iter()
+        .position(|file| file.timestamp.timestamp() == start_timestamp)
+    {
+        Some(idx) => idx,
+        None => panic!("Could not find the desired timestamp: {}", start_timestamp),
+    };
 
-    // Find the first file that follows the `start_time` constrain
-    // TODO
-    let mut last_in = &files[0];
-    output.push(0);
+    // Breaking condition: stop including files after this timestamp
+    // If option was None => include until the end
+    let final_timestamp = match stop_timestamp {
+        Some(t) => t,
+        None => files[files.len() - 1].timestamp.timestamp(),
+    };
 
-    for (idx, f) in files.iter().enumerate() {
-        if step_function(f.timestamp - last_in.timestamp) >= step {
-            output.push(idx);
-            last_in = f;
-        }
+    if start_timestamp >= final_timestamp {
+        panic!(
+            "The start timestamp should be lower than the stop timestamp: {} >= {}",
+            start_timestamp, final_timestamp
+        );
     }
 
-    output
+    let stop_idx = match files // Could skip the first few timestamps because higher than start
+        .iter()
+        .position(|file| file.timestamp.timestamp() == final_timestamp)
+    {
+        Some(idx) => idx,
+        None => panic!(
+            "Could not find the final desired timestamp: {}",
+            final_timestamp
+        ),
+    };
+
+    &files[start_idx..stop_idx + 1]
 }
-*/
 
 fn get_by_files_step(files: &[FileMetadata], step: i64) -> Vec<usize> {
     (0..files.len()).step_by(step as usize).collect()
@@ -118,9 +145,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         _ => panic!("Unknown unit step!"),
     };
 
+    let sliced_time_window = match args.start_specific_timestamp {
+        Some(start_timestamp) => {
+            cut_start_stop_timestamp(&files, start_timestamp, args.stop_timestamp)
+        }
+        None => &files,
+    };
+
     let idxs_selected = match args.unit_step.as_ref() {
-        "all" => get_by_files_step(&files, args.step),
-        _ => get_by_unit_step(&files, args.step, step_function),
+        "all" => get_by_files_step(sliced_time_window, args.step),
+        _ => get_by_unit_step(sliced_time_window, args.step, step_function),
     };
     println!(
         "Size total: {total}, size after selection: {two}",
@@ -128,7 +162,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         two = idxs_selected.len()
     );
 
-    let files_selected = get_vec_values_from_idxs(&files, &idxs_selected);
+    let files_selected = get_vec_values_from_idxs(sliced_time_window, &idxs_selected);
 
     // let pb = ProgressBar::new(files_selected.len() as u64);
     // let all_routers_sel_tmsp = files_selected

@@ -5,7 +5,7 @@ Usage:
 $>python/ main_plot.py -m <metric to be considered> -e <plot extension>
 
 Accepted values:
-    metric: Timeline, Infrastructure, ...
+    metric: Timeline, Infrastructure, ECMP, ...
     plot extension: PDF, PNG, EPS (optional argument)
 
 __author__  = "Benoit Donnet (ULiege -- Institut Montefiore)"
@@ -18,6 +18,7 @@ import sys, os
 
 from Timeline import *
 from Infrastructure import *
+from ECMP import *
 from Utils_Benoit import *
 
 def main(argv):
@@ -28,6 +29,10 @@ def main(argv):
     args = parser.parse_args()
 
     ext = retrieve_extension(args.extension)
+
+    if args.metric=="ECMP":
+        plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
+                            "../figures/ecmp-imbalance."+ext)
 
     if args.metric=="Infrastructure":
         plot_infra_evol(["../csv/nb-nodes-all.csv", "../csv/nb-nodes-ovh.csv", "../csv/nb-nodes-external.csv"],

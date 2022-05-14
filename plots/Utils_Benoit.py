@@ -41,8 +41,8 @@ Font dictionary.
 Used by (nearly) every plotting functions
 """
 
-FONT_SIZE = 30
-FONT_SIZE_TICKS = 20
+FONT_SIZE = 40
+FONT_SIZE_TICKS = 30
 FONT_SIZE_LEGEND = 20
 font = {
     'fontname'   : 'DejaVu Sans',

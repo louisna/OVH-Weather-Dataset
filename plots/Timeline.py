@@ -1,5 +1,9 @@
 """
-WeatherMap timeline plotting
+OVH WeatherMap timeline plotting
+
+__author__  = "Benoit Donnet (ULiege -- Institut Montefiore)"
+__version__ = "1.0"
+__date__    = "12/05/2022"
 """
 
 import sys, os

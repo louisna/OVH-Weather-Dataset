@@ -1,8 +1,9 @@
 """
-Infrastructure plotting
-#nodes
-#links
-node degree distribution
+OVH infrastructure plotting (#nodes, #links, node degree distribution)
+
+__author__  = "Benoit Donnet (ULiege -- Institut Montefiore)"
+__version__ = "1.0"
+__date__    = "12/05/2022"
 """
 
 from datetime import timedelta

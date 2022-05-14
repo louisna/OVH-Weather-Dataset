@@ -316,12 +316,12 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
                     Some(val) => match val.as_u64() {
                         Some(v) => v,
                         None => {
-                            println!("Voici l'autre fichier qui pose probleme: {}", filepath);
+                            println!("Parsing problem (1) with the file: {}", filepath);
                             return None;
                         }
                     },
                     None => {
-                        println!("Voici le fichier qui merde: {}", filepath);
+                        println!("Parsing problem (2) with the file: {}", filepath);
                         return None;
                     }
                 };
@@ -330,13 +330,13 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
                     Some(p) => match p.as_str() {
                         Some(n) => n,
                         None => {
-                            println!("Does not work: {}, {:?}", filepath, p);
-                            panic!("Error");
+                            println!("Parsing problem (3) with the file: {}, {:?}", filepath, p);
+                            return None;
                         }
                     },
                     None => {
-                        println!("Error in file {}", filepath);
-                        panic!("Problem");
+                        println!("Parsing problem (4) with the file {}", filepath);
+                        return None;
                     }
                 };
                 let link_obj = Link {

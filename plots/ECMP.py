@@ -55,7 +55,7 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
 
     ax[0].invert_yaxis()
 
-    g.set_ylabel(latex_label('ECMP Imbalance (\%age)'), fontsize=FONT_SIZE)
+    g.set_ylabel(latex_label('Imbalance (\%age)'), fontsize=FONT_SIZE)
     sns.despine(offset=10, top=True, right=True, left=False, bottom=False)
 
     # Color bar and size of ticks
@@ -68,7 +68,11 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
     ###########################
     # BarPlot                 #
     ###########################
-    dfTotal.plot(y='Total', kind='bar', legend=False, ax=ax[1])
+    dates = [datetime.fromtimestamp(ts).strftime('%Y-%m') for ts in dfTotal['Time']]
+    dfTotal['Time'] = dates
+    dfTotal.index = pd.to_datetime(dfTotal.index)
+
+    dfTotal.plot(x='Time', y='Total', kind='bar', legend=False, ax=ax[1])
 
     ax[1].semilogy()
     ax[1].set_ylim(1, max_ylim_total)
@@ -78,6 +82,7 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
     ax[1].set_xlabel(latex_label('Time'), font)
     ax[1].set_ylabel(latex_label("Raw Number"), font)
     ax[1].tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
+    ax[1].tick_params(axis='x', labelrotation=45)
 
     ax[1].grid(True, color='gray', linestyle='dashed')
 

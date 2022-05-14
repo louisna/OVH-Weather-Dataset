@@ -24,10 +24,8 @@ struct Cli {
     /// Step value to skip files with unit `unit_step`
     #[structopt(short = "s", default_value = "1")]
     step: i64,
-    /// Presice starting time of the selection, in the same unit at the `unit_step`
-    // #[structopt(short = "p")]
-    // precise_start_time: Option<String>,
-    #[structopt(short = "o", default_value = "csv")]
+    /// Output directory where all the CSV results files will be stored
+    #[structopt(short = "o", default_value = ".")]
     output_dir: String,
     /// Number of threads used to parse the yaml files
     #[structopt(short = "n", default_value = "4")]

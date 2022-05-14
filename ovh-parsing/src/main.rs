@@ -162,18 +162,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let files_selected = get_vec_values_from_idxs(sliced_time_window, &idxs_selected);
 
-    // let pb = ProgressBar::new(files_selected.len() as u64);
-    // let all_routers_sel_tmsp = files_selected
-    //     .iter()
-    //     .map(|&x| {
-    //         pb.inc(1);
-    //         parse_yaml(&x.filepath, x.timestamp)
-    //     })
-    //     .collect::<Vec<OvhData>>();
-    // pb.finish_with_message("done");
-
     let all_results = multithread_parsing(&files_selected, args.nb_threads as usize);
-
     let all_writers = [
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
         |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
@@ -207,7 +196,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(false)),
     ];
 
-    // Json parsing is a bit different
+    // YAML parsing is a bit different
     let all_filenames_yaml = [
         "ecmp-diffs-all.yaml",
         "ecmp-diffs-ovh.yaml",
@@ -231,9 +220,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         .collect();
     let mut wrt_values = WriterBuilder::new()
         .has_headers(true)
+        .delimiter(b';')
         .from_path(Path::new(&args.output_dir).join("ecmp-agg-values-all.csv"))?;
     let mut wrt_total = WriterBuilder::new()
         .has_headers(true)
+        .delimiter(b';')
         .from_path(Path::new(&args.output_dir).join("ecmp-agg-total-all.csv"))?;
     // Write the headers
     wrt_values.serialize(("Time", ranges_str))?;

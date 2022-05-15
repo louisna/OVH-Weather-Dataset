@@ -221,18 +221,33 @@ fn main() -> Result<(), Box<dyn Error>> {
         .windows(2)
         .map(|slice| format!("[{},{}[", slice[0], slice[1]))
         .collect();
-    let mut wrt_values = WriterBuilder::new()
-        .has_headers(true)
-        .delimiter(b';')
-        .from_path(Path::new(&args.output_dir).join("ecmp-agg-values-all.csv"))?;
-    let mut wrt_total = WriterBuilder::new()
-        .has_headers(true)
-        .delimiter(b';')
-        .from_path(Path::new(&args.output_dir).join("ecmp-agg-total-all.csv"))?;
-    // Write the headers
-    wrt_values.serialize(("Time", ranges_str))?;
-    wrt_total.serialize(("Time", "Total"))?;
-    write_csv_ecmp_aggregated(&aggregated, &mut wrt_values, &mut wrt_total, None, ranges)?;
+
+    let all_ecmp_imbalance_files = [
+        |x: &str| format!("ecmp-agg-{}-all.csv", x),
+        |x: &str| format!("ecmp-agg-{}-ovh.csv", x),
+        |x: &str| format!("ecmp-agg-{}-external.csv", x),
+    ];
+
+    let all_ecmp_imbalance_options = [
+        None,
+        Some(true),
+        Some(false),
+    ];
+
+    for (filename, option) in all_ecmp_imbalance_files.iter().zip(all_ecmp_imbalance_options) {
+        let mut wrt_values = WriterBuilder::new()
+            .has_headers(true)
+            .delimiter(b';')
+            .from_path(Path::new(&args.output_dir).join(filename("values")))?;
+        let mut wrt_total = WriterBuilder::new()
+            .has_headers(true)
+            .delimiter(b';')
+            .from_path(Path::new(&args.output_dir).join(filename("total")))?;
+        // Write the headers
+        wrt_values.serialize(("Time", &ranges_str))?;
+        wrt_total.serialize(("Time", "Total"))?;
+        write_csv_ecmp_aggregated(&aggregated, &mut wrt_values, &mut wrt_total, option, ranges)?;
+    }
 
     Ok(())
 }

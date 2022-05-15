@@ -33,6 +33,7 @@ def main(argv):
     if args.metric=="ECMP":
         plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
                             "../figures/ecmp-imbalance."+ext)
+        plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-boxplot-march-2022."+ext, 0, 20)
 
     if args.metric=="Infrastructure":
         plot_infra_evol(["../csv/nb-nodes-all.csv", "../csv/nb-nodes-ovh.csv", "../csv/nb-nodes-external.csv"],

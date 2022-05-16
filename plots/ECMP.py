@@ -1,7 +1,7 @@
 """
 Plots OVH ECMP
 
-__author__  = "Benoit Donnet (ULiege -- Institut Montefiore)"
+__author__  = "Benoit Donnet (ULiege -- Institut Montefiore), Louis Navarre (UCLouvain - IP Networking Lab"
 __version__ = "1.0"
 __date__    = "14/05/2022"
 """

@@ -19,6 +19,7 @@ import sys, os
 from Timeline import *
 from Infrastructure import *
 from ECMP import *
+from loads import *
 from Utils_Benoit import *
 
 def main(argv):
@@ -33,7 +34,10 @@ def main(argv):
     if args.metric=="ECMP":
         plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
                             "../figures/ecmp-imbalance."+ext)
-        plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-boxplot-march-2022."+ext, 0, 20)
+        plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
+    
+    if args.metric == "LOADS":
+        plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)
 
     if args.metric=="Infrastructure":
         plot_infra_evol(["../csv/nb-nodes-all.csv", "../csv/nb-nodes-ovh.csv", "../csv/nb-nodes-external.csv"],

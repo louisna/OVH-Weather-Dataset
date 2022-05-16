@@ -51,6 +51,11 @@ pub fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), 
     Ok(())
 }
 
+fn is_peer_from_name(name: &str) -> bool {
+    let str_split: Vec<&str> = name.split("#").collect();
+        str_split[0].to_uppercase() == str_split[0]
+}
+
 #[derive(Debug)]
 pub struct Link {
     pub label: String,
@@ -65,13 +70,13 @@ pub struct Router {
 
 impl Router {
     pub fn is_external(&self) -> bool {
-        self.name.to_uppercase() == self.name
+        is_peer_from_name(&self.name)
     }
 
     pub fn has_external(&self) -> bool {
         self.peers
             .iter()
-            .map(|(peer_name, _)| &peer_name.to_uppercase() == peer_name)
+            .map(|(peer_name, _)| is_peer_from_name(&peer_name))
             .any(|x| x)
     }
 
@@ -82,7 +87,7 @@ impl Router {
         Some(
             self.peers
                 .iter()
-                .filter(|(peer_name, _)| &&peer_name.to_uppercase() == peer_name)
+                .filter(|(peer_name, _)| is_peer_from_name(peer_name))
                 .map(|(_, links)| links)
                 .collect::<Vec<&Vec<Link>>>(),
         )

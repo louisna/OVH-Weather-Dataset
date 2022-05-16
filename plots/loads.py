@@ -134,7 +134,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
         bplot = ax.boxplot(data_file.values(), whis=(1,99), showfliers=False, medianprops=medianprops, patch_artist=True)
         x_value = [list(data_file.keys())[i] + 1 for i in range(len(data_file.keys()))]
         hours = [
-            i for i in x_value if i % 2 == 0
+            i - 1 for i in x_value if i % 2 == 0
         ]
         for patch in bplot["boxes"]:
             patch.set_facecolor(colors[0])
@@ -157,3 +157,68 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
     #save figure
     savefig(output, bbox_inches='tight')
     
+
+def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
+    """
+    Plots traffic load over the (almost) two years of data we collected
+
+    Args:
+        csv_files: input CSV files
+        labels: legend labels
+        output: output file name
+    """
+    all_data = list()
+
+    for file in csv_files:
+        data_file = list()
+        with open(file) as fd:
+            for line in tqdm(fd.readlines()):
+                tab = line.split(": [")
+                # timestamp = datetime.fromtimestamp(timestamp)
+                data = [int(i) for i in tab[1][:-2].split(",")]
+                data_file.append(data)
+        all_data.append(data_file)
+    
+    # Flatten all lists into a major list
+    all_data_flatten = list()
+    for data_file in all_data:
+        data_flatten = list()
+        for data in data_file:
+            data_flatten += data
+        all_data_flatten.append(data_flatten)
+    
+    # CDF computation
+    all_bins = list()
+    all_cdfs = list()
+    max_data = 0
+    for data_file in all_data_flatten:
+        bins, cdf = compute_cdf(data_file, nb_bins=500)
+        all_bins.append(bins)
+        all_cdfs.append(cdf)
+        max_data = max(max_data, max(data_file))
+
+    # Create figure
+    fig = figure()
+    ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
+
+    # Style
+    colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+    if len(csv_files) == 1:
+        colors[0] = colors[1]
+    lstyles = ["solid", "dotted", "dashed"]
+
+    for i, (bins, cdf) in enumerate(zip(all_bins, all_cdfs)):
+        ax.step(bins, cdf, label=labels[i], color=colors[i], lw=2, ls=linestyles[lstyles[i]])
+
+    axis_aesthetic(ax)
+    ax.set_ylabel(latex_label('CDF'), font)
+    ax.set_xlabel(latex_label('Load (\%)'), font)
+
+    ax.set_xticks(list(range(0, 101, 10)))
+
+    ax.grid(True, color='gray', linestyle='dashed')
+
+    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+
+    #save figure
+    savefig(output, bbox_inches='tight')

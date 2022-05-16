@@ -38,15 +38,16 @@ def main(argv):
 
     if args.metric == "LOADS":
         # plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)
-        plot_load_boxplot_week(["../csv_march_2022/loads-all.yaml"], "Links load (\%)", "../figures/load-ts-march-2022."+ext, 0, 100)
+        # plot_load_boxplot_week(["../csv_march_2022/loads-all.yaml"], "Links load (\%)", "../figures/load-ts-march-2022."+ext, 0, 100)
+        plot_all_loads_in_cdf(["../csv_march_2022/loads-all.yaml"], ["All"], "CDF", "../figures/load-cdf."+ext)
 
     if args.metric=="Infrastructure":
-        plot_infra_evol(["../csv/nb-nodes-all.csv", "../csv/nb-nodes-ovh.csv", "../csv/nb-nodes-external.csv"],
-        '\# Routers', ['All', 'OVH', 'External'] , "../figures/nb-nodes-evolution."+ext, 60, 210)
+        plot_infra_evol(["../csv/nb-nodes-ovh.csv"],
+        '\# Routers', ["OVH"] , "../figures/nb-nodes-evolution."+ext, 60, 210)
         plot_infra_evol(["../csv/nb-links-all.csv", "../csv/nb-links-ovh.csv", "../csv/nb-links-external.csv"],
         '\# Links', ['All', 'OVH', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1000)
-        plot_node_degree(["../csv/static_node_degree.csv", "../csv/static_node_degree_internal.csv", "../csv/static_node_degree_peers.csv"],
-        ['All', 'OVH', 'Peers'], "../figures/node-degree_09_05."+ext)
+        plot_node_degree(["../csv/static_node_degree_internal.csv"],
+        ["OVH"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
         #plot_timeline_dataset("../figures/timeline."+ext)

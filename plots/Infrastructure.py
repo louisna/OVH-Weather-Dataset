@@ -39,10 +39,12 @@ def plot_node_degree(csv_files, labels, output):
 
     #style
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+    if len(csv_files) == 1:
+        colors[0] = colors[1]
     lstyles = ["solid", "dotted", "dashed"]
 
     for i, (bins, cdf) in enumerate(zip(all_bins, all_cdfs)):
-        ax.plot(bins, cdf, label=labels[i], color=colors[i], lw=2, ls=linestyles[lstyles[i]])
+        ax.step(bins, cdf, label=labels[i], color=colors[i], lw=2, ls=linestyles[lstyles[i]])
 
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label('CCDF'), font)
@@ -87,6 +89,8 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
 
     #style
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+    if len(csv_files) == 1:
+        colors[0] = colors[1]
     lstyles = ["solid", "dotted", "dashed"]
 
     #plot

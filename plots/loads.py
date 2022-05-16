@@ -9,6 +9,7 @@ __date__    = "16/05/2022"
 from Utils_Benoit import *
 from tqdm import tqdm
 import matplotlib.dates as mdates
+import pickle
 
 
 def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
@@ -90,7 +91,19 @@ def aggregate_week_day_hours(x, data):
         # if day < 4: continue  # Weekend
         hour = timestamp_into_hour_floor(timestamp)
         hour_list = aggr.get(hour, list())
-        aggr[hour] = hour_list + data_vec
+        print(timestamp)
+        hour_list.extend(data_vec)
+        aggr[hour] = hour_list
+    return aggr
+
+
+def aggregate_per_day(x, data):
+    aggr = dict()
+    for timestamp, data_vec in zip(x, data):
+        day = timestamp_into_day(timestamp)
+        day_list = aggr.get(day, list())
+        day_list.extend(data_vec)
+        aggr[day] = day_list
     return aggr
 
 
@@ -108,40 +121,153 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
     all_data = list()
     all_x = list()
 
-    for file in csv_files:
-        data_file = list()
-        x = list()
-        with open(file) as fd:
-            for line in tqdm(fd.readlines()):
-                tab = line.split(": [")
-                timestamp = int(tab[0])
-                # timestamp = datetime.fromtimestamp(timestamp)
-                data = [int(i) for i in tab[1][:-2].split(",")]
-                data_file.append(data)
-                x.append(timestamp)
-        all_x.append(x)
-        all_data.append(data_file)
+    pickle_filename = "../csv/loads.data"
+    try:
+        with open(pickle_filename, "rb") as pickle_fd:
+            all_data, all_x, max_values = pickle.load(pickle_fd)
+            print("USED PICKLE")
+    except Exception as e:
+        print("Cannot use pickle", e)
+
+        for file in csv_files:
+            data_file = list()
+            x = list()
+            with open(file) as fd:
+                for line in tqdm(fd.readlines()):
+                    tab = line.split(": [")
+                    timestamp = int(tab[0])
+                    # timestamp = datetime.fromtimestamp(timestamp)
+                    try:
+                        data = [int(i) for i in tab[1][:-2].split(",")]
+                        data_file.append(data)
+                        x.append(timestamp)
+                    except Exception as e:
+                        print("Exception:", e)
+                        continue
+            all_x.append(x)
+            all_data.append(data_file)
+        all_data_aggregated = []
+        for x, d in tqdm(zip(all_x, all_data)):
+            all_data_aggregated.append(aggregate_week_day_hours(x, d))
+        keys = all_data_aggregated[0].keys()
+        sorted(keys)
+        max_values = [max(all_data_aggregated[0][i]) for i in keys]
+        all_data = cbook.boxplot_stats(all_data_aggregated[0].values(), labels=all_data_aggregated[0].keys(), whis=(1, 99))
+        with open(pickle_filename, "wb+") as fd:
+            pickle.dump((all_data, all_x, max_values), fd)
+    
+    fig = figure()
+    ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
+
+    colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+    lstyles = ["solid", "dotted", "densely dashed"]
+    medianprops = dict(linewidth=3.5, color=colors[1])
+    
+    #all_data_aggregated = []
+    #for x, d in tqdm(zip(all_x, all_data)):
+    #     all_data_aggregated.append(aggregate_week_day_hours(x, d))
+    #for data_file in all_data_aggregated:
+    all_data = sorted(all_data, key=lambda i: i["label"])
+    print(all_data)
+    bplot = ax.bxp(all_data, showfliers=False, medianprops=medianprops, patch_artist=True)
+    x_value = [i["label"] for i in all_data]
+    x_value = sorted(x_value)
+    hours = [
+        i+1 for i in x_value if i % 2 == 0
+    ]
+    for patch in bplot["boxes"]:
+        patch.set_facecolor(colors[0])
+    #max_values = [max(i) for i in all_data.values()]
+    print(max_values)
+    plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
+    ax.set_xticks(hours)
+    ax.set_xticklabels(list(range(24))[::2])
+    
+    axis_aesthetic(ax)
+    ax.set_ylabel(latex_label(ylabel), font)
+    ax.set_xlabel(latex_label('Time (hour)'), font)
+
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ylim(ymin, ymax)
+
+    ax.grid(True, color='gray', linestyle='dashed')
+
+    # legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+
+    #save figure
+    savefig(output, bbox_inches='tight')
+
+
+def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
+    """
+    Plots load in usage over time with boxplots
+
+    Args:
+        csv_files: input CSV files
+        ylabel: ylabel string
+        output: output filename
+        ymin: min y-axis tick value
+        ymax: max y-axis tick value
+    """
+    all_data = list()
+    all_x = list()
+
+    pickle_filename = "../csv/loads_per_day.data"
+    try:
+        with open(pickle_filename, "rb") as pickle_fd:
+            all_data, all_x, max_values = pickle.load(pickle_fd)
+            print("USED PICKLE")
+    except Exception as e:
+        print("Cannot use pickle", e)
+
+        for file in csv_files:
+            data_file = list()
+            x = list()
+            with open(file) as fd:
+                for line in tqdm(fd.readlines()):
+                    tab = line.split(": [")
+                    timestamp = int(tab[0])
+                    # timestamp = datetime.fromtimestamp(timestamp)
+                    try:
+                        data = [int(i) for i in tab[1][:-2].split(",")]
+                        data_file.append(data)
+                        x.append(timestamp)
+                    except Exception as e:
+                        print("Exception:", e)
+                        continue
+            all_x.append(x)
+            all_data.append(data_file)
+        all_data_aggregated = []
+        for x, d in tqdm(zip(all_x, all_data)):
+            all_data_aggregated.append(aggregate_per_day(x, d))
+        keys = all_data_aggregated[0].keys()
+        keys = sorted(keys)
+        max_values = [max(all_data_aggregated[0][i]) for i in keys]
+        all_data = cbook.boxplot_stats(all_data_aggregated[0].values(), labels=all_data_aggregated[0].keys(), whis=(1, 99))
+        with open(pickle_filename, "wb+") as fd:
+            pickle.dump((all_data, all_x, max_values), fd)
     
     fig = figure()
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
     lstyles = ["solid", "dotted", "dashed"]
-    medianprops = dict(linewidth=2.5, color=colors[1])
+    medianprops = dict(linewidth=3.5, color=colors[1])
     
-    all_data_aggregated = [aggregate_week_day_hours(x, d) for x, d in zip(all_x, all_data)]
-    for data_file in all_data_aggregated:
-        bplot = ax.boxplot(data_file.values(), whis=(1,99), showfliers=False, medianprops=medianprops, patch_artist=True)
-        x_value = [list(data_file.keys())[i] + 1 for i in range(len(data_file.keys()))]
-        hours = [
-            i - 1 for i in x_value if i % 2 == 0
-        ]
-        for patch in bplot["boxes"]:
-            patch.set_facecolor(colors[0])
-        max_values = [max(i) for i in data_file.values()]
-        plt.scatter(x_value, max_values, color=colors[2], marker="^")
-        ax.set_xticks(hours)
-        ax.set_xticklabels(list(range(24))[::2])
+    all_data = sorted(all_data, key=lambda i: i["label"])
+    print(all_data)
+    bplot = ax.bxp(all_data, showfliers=False, medianprops=medianprops, patch_artist=True)
+    x_value = [i["label"] for i in all_data]
+    x_value = sorted(x_value)
+    hours = [
+        i+1 for i in x_value if i % 2 == 0
+    ]
+    for patch in bplot["boxes"]:
+        patch.set_facecolor(colors[0])
+    print(max_values)
+    plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
+    # ax.set_xticklabels(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+    ax.set_xticklabels(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"])
     
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label(ylabel), font)
@@ -173,10 +299,14 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
         data_file = list()
         with open(file) as fd:
             for line in tqdm(fd.readlines()):
-                tab = line.split(": [")
-                # timestamp = datetime.fromtimestamp(timestamp)
-                data = [int(i) for i in tab[1][:-2].split(",")]
-                data_file.append(data)
+                try:
+                    tab = line.split(": [")
+                    # timestamp = datetime.fromtimestamp(timestamp)
+                    data = [int(i) for i in tab[1][:-2].split(",")]
+                    data_file.append(data)
+                except Exception as e:
+                    print("Exception:", e)
+                    continue
         all_data.append(data_file)
     
     # Flatten all lists into a major list
@@ -205,7 +335,7 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
     if len(csv_files) == 1:
         colors[0] = colors[1]
-    lstyles = ["solid", "dotted", "dashed"]
+    lstyles = ["solid", "dotted", "densely dashed"]
 
     for i, (bins, cdf) in enumerate(zip(all_bins, all_cdfs)):
         ax.step(bins, cdf, label=labels[i], color=colors[i], lw=2, ls=linestyles[lstyles[i]])
@@ -222,3 +352,6 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
 
     #save figure
     savefig(output, bbox_inches='tight')
+
+    with open("../test_parsing/backup_load_cdf.txt", "w+") as fd:
+        fd.write(f"{all_bins}\n{all_cdfs}")

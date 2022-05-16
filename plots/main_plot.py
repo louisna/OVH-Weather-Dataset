@@ -44,9 +44,9 @@ def main(argv):
 
     if args.metric=="Infrastructure":
         plot_infra_evol(["../csv/nb-nodes-ovh.csv"],
-        '\# Routers', ["OVH"] , "../figures/nb-nodes-evolution."+ext, 60, 210)
+        '\# Routers', ["OVH"] , "../figures/nb-nodes-evolution."+ext, 100, 140)
         plot_infra_evol(["../csv/nb-links-all.csv", "../csv/nb-links-ovh.csv", "../csv/nb-links-external.csv"],
-        '\# Links', ['All', 'OVH', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1000)
+        '\# Links', ['All', 'Internal', 'Peering'] , "../figures/nb-links-evolution."+ext, 100, 1000)
         plot_node_degree(["../csv/static_node_degree_internal.csv"],
         ["OVH"], "../figures/node-degree_09_05."+ext)
 

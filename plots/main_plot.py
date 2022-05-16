@@ -35,7 +35,7 @@ def main(argv):
         plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
                             "../figures/ecmp-imbalance."+ext)
         plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
-    
+
     if args.metric == "LOADS":
         plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)
 
@@ -48,7 +48,7 @@ def main(argv):
         ['All', 'OVH', 'Peers'], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
-        plot_timeline_dataset("../figures/timeline."+ext)
+        #plot_timeline_dataset("../figures/timeline."+ext)
         plot_interval_dataset("../figures/files_distance."+ext)
 
 if __name__ == "__main__":

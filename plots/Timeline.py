@@ -54,6 +54,9 @@ def plot_interval_dataset(output):
     plt.ylabel(latex_label('CDF'), font)
     plt.xlabel(latex_label('Distance (sec.)'), font)
 
+    #axis stuffs
+    axis_aesthetic(ax)
+
     #formatter
     formatter = ScalarFormatter()
     formatter.set_scientific(False)
@@ -72,9 +75,6 @@ def plot_interval_dataset(output):
     #axis limits
     plt.xlim(250, 60*60*4)
     plt.ylim(0, 1)
-
-    #axis stuffs
-    axis_aesthetic(ax)
 
     legend(fontsize=FONT_SIZE_LEGEND, handlelength=3, ncol=2, loc='lower right')
     ax.grid(True, color='gray', linestyle='dashed')

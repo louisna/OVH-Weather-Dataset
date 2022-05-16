@@ -1,12 +1,10 @@
 use chrono::NaiveDateTime;
-use ovh_parsing::{parse_yaml, Router, write_in_csv};
+use ovh_parsing::{parse_yaml, write_in_csv, Router};
 use std::env;
 use std::error::Error;
 
-fn static_node_degree(data :&[&Router], output_csv: &str) -> Result<(), Box<dyn Error>> {
-    let res = data.iter().map(
-        |&router| router.peers.len()
-    ).collect();
+fn static_node_degree(data: &[&Router], output_csv: &str) -> Result<(), Box<dyn Error>> {
+    let res = data.iter().map(|&router| router.peers.len()).collect();
 
     write_in_csv(res, output_csv)
 }
@@ -14,13 +12,12 @@ fn static_node_degree(data :&[&Router], output_csv: &str) -> Result<(), Box<dyn 
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!("Usage: {} <instance-path>", args[0]);
+        panic!("Usage: {} <instance-path>", args[0]);
     }
 
+    // Set a dummy timestamp, not important here
     let data = parse_yaml(&args[1], NaiveDateTime::from_timestamp(100, 0)).unwrap();
-    let data_routers = data.data.iter().map(
-        |(_, v)| v
-    ).collect::<Vec<&Router>>();
+    let data_routers = data.data.iter().map(|(_, v)| v).collect::<Vec<&Router>>();
     static_node_degree(&data_routers, "../csv/static_node_degree.csv").unwrap();
 
     let data_external = data.get_peering_routers();

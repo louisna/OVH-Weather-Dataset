@@ -265,14 +265,18 @@ impl OvhData {
             .map(|router| {
                 router
                     .peers
-                    .values()
-                    .map(|peering| peering.len())
+                    .iter()
+                    .filter(|(peer_name, _)| match ovh_nodes {
+                        Some(true) => peer_name != &&peer_name.to_uppercase(),
+                        _ => true,
+                    })
+                    .map(|(_, peering)| peering.len())
                     .sum::<usize>()
             })
             .sum::<usize>()
             / match ovh_nodes {
-                Some(_) => 1, //
-                None => 2,
+                Some(false) => 1, //
+                _ => 2,
             }) as i32
     }
 

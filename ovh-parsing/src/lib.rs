@@ -114,6 +114,10 @@ pub struct ExperimentResults {
     pub ecmp_diffs: Vec<i8>,
     pub ecmp_diffs_ovh: Vec<i8>,
     pub ecmp_diffs_external: Vec<i8>,
+
+    pub loads: Vec<i8>,
+    pub loads_ovh: Vec<i8>,
+    pub loads_external: Vec<i8>,
 }
 
 impl Default for ExperimentResults {
@@ -129,6 +133,9 @@ impl Default for ExperimentResults {
             ecmp_diffs: Vec::new(),
             ecmp_diffs_ovh: Vec::new(),
             ecmp_diffs_external: Vec::new(),
+            loads: Vec::new(),
+            loads_ovh: Vec::new(),
+            loads_external: Vec::new(),
         }
     }
 }
@@ -173,6 +180,22 @@ impl ExperimentResults {
             Some(true) => &self.ecmp_diffs_ovh,
             Some(false) => &self.ecmp_diffs_external,
             None => &self.ecmp_diffs,
+        };
+        let j_value = json_to_string(ecmp_values).unwrap();
+        let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
+
+        writeln!(file_wrt, "{}: {}", j_key, j_value)
+    }
+
+    pub fn write_yaml_load(
+        &self,
+        file_wrt: &mut File,
+        ovh_nodes: Option<bool>,
+    ) -> Result<(), std::io::Error> {
+        let ecmp_values = match ovh_nodes {
+            Some(true) => &self.loads_ovh,
+            Some(false) => &self.loads_external,
+            None => &self.loads,
         };
         let j_value = json_to_string(ecmp_values).unwrap();
         let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
@@ -287,6 +310,29 @@ impl OvhData {
                         as i8;
                     output.push(max_load - min_load);
                 }
+            }
+        }
+
+        output
+    }
+
+    pub fn get_link_loads(&self, ovh_nodes: Option<bool>) -> Vec<i8> {
+        let mut output: Vec<i8> = Vec::with_capacity(self.data.len());
+        for router in self.data.values().filter(|&r| match ovh_nodes {
+            Some(true) => !r.is_external(),
+            Some(false) => r.is_external(),
+            None => true,
+        }) {
+            for (_, peer_links) in router
+                .peers
+                .iter()
+                .filter(|(peer_name, _)| match ovh_nodes {
+                    Some(true) => &&peer_name.to_uppercase() != peer_name,
+                    _ => true,
+                })
+            {
+                peer_links.iter().filter(|&link| link.load > 1).for_each(|link| output.push(link.load as i8));
+
             }
         }
 

@@ -39,6 +39,9 @@ struct Cli {
     /// Stop the parsing at the very specified timestamp
     #[structopt(long = "stop-timestamp")]
     stop_timestamp: Option<i64>,
+    /// If set, store non-aggregated results about ECMP diffs and link loads in YAML files
+    #[structopt(long = "enable-full-load")]
+    enable_full_load: bool,
 }
 
 /// Returns a Vec of indexes of the files one should take given the `step`
@@ -193,27 +196,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             .for_each(|res| wrt_fn(res, &mut wrt).unwrap())
     }
 
-    let all_writers_yaml = [
-        |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, None),
-        |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(true)),
-        |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(false)),
-    ];
-
-    // YAML parsing is a bit different
-    let all_filenames_yaml = [
-        "ecmp-diffs-all.yaml",
-        "ecmp-diffs-ovh.yaml",
-        "ecmp-diffs-external.yaml",
-    ];
-
-    for (wrt_fn, filename) in all_writers_yaml.iter().zip(all_filenames_yaml) {
-        // Clean file
-        let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
-        all_results
-            .iter()
-            .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
-    }
-
     // ECMP aggregation
     let aggregated = aggregate_by_time(&all_results);
     let ranges: &[i8; 9] = &[0, 1, 2, 3, 4, 5, 6, 7, 100];
@@ -228,13 +210,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         |x: &str| format!("ecmp-agg-{}-external.csv", x),
     ];
 
-    let all_ecmp_imbalance_options = [
-        None,
-        Some(true),
-        Some(false),
-    ];
+    let all_routers_options = [None, Some(true), Some(false)];
 
-    for (filename, option) in all_ecmp_imbalance_files.iter().zip(all_ecmp_imbalance_options) {
+    for (filename, option) in all_ecmp_imbalance_files
+        .iter()
+        .zip(all_routers_options)
+    {
         let mut wrt_values = WriterBuilder::new()
             .has_headers(true)
             .delimiter(b';')
@@ -247,6 +228,46 @@ fn main() -> Result<(), Box<dyn Error>> {
         wrt_values.serialize(("Time", &ranges_str))?;
         wrt_total.serialize(("Time", "Total"))?;
         write_csv_ecmp_aggregated(&aggregated, &mut wrt_values, &mut wrt_total, option, ranges)?;
+    }
+
+    if args.enable_full_load {
+        // ECMP full loads
+        let all_writers_yaml = [
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, None),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(true)),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(false)),
+        ];
+
+        // YAML parsing for all ECMP diffs
+        let all_filenames_yaml = [
+            "ecmp-diffs-all.yaml",
+            "ecmp-diffs-ovh.yaml",
+            "ecmp-diffs-external.yaml",
+        ];
+
+        for (wrt_fn, filename) in all_writers_yaml.iter().zip(all_filenames_yaml) {
+            // Clean file
+            let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
+            all_results
+                .iter()
+                .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
+        }
+
+        let all_writers_yaml_loads = [
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, None),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, Some(true)),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, Some(false)),
+        ];
+
+        let all_filenames_yaml_load = ["loads-all.yaml", "loads-ovh.yaml", "loads-external.yaml"];
+
+        for (wrt_fn, filename) in all_writers_yaml_loads.iter().zip(all_filenames_yaml_load) {
+            // Clean file
+            let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
+            all_results
+                .iter()
+                .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
+        }
     }
 
     Ok(())

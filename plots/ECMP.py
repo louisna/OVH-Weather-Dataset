@@ -160,7 +160,7 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
     savefig(output, bbox_inches='tight')
 
 
-def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, ylabel, output):
+def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
     """
     Plots traffic load over the (almost) two years of data we collected
 
@@ -210,10 +210,10 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, ylabel, output):
 
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label('CDF'), font)
-    ax.set_xlabel(latex_label('ECMP imbalance (\%)'), font)
+    ax.set_xlabel(latex_label(xlabel), font)
 
     # ax.set_xticks(list(range(0, 101, 10)))
-    ax.set_xlim((0, 10))
+    ax.set_xlim(xlim)
 
     ax.grid(True, color='gray', linestyle='dashed')
 

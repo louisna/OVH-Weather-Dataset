@@ -20,6 +20,7 @@ from Timeline import *
 from Infrastructure import *
 from ECMP import *
 from loads import *
+from peeringdb import *
 from Utils_Benoit import *
 
 def main(argv):
@@ -55,6 +56,9 @@ def main(argv):
     if args.metric=="Timeline":
         #plot_timeline_dataset("../figures/timeline."+ext)
         plot_interval_dataset("../figures/files_distance."+ext)
+    
+    if args.metric == "Peering":
+        plot_peering_db_example(["../csv/AMS-IX_ams-5-n7.csv"], "../figures/peering-db-example.".ext)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

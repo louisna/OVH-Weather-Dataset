@@ -268,6 +268,28 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .iter()
                 .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
         }
+
+        // Nb ECMP links
+        let all_writers_yaml = [
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, None),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, Some(true)),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, Some(false)),
+        ];
+
+        // YAML parsing for all ECMP diffs
+        let all_filenames_yaml = [
+            "ecmp-nb-links-all.yaml",
+            "ecmp-nb-links-ovh.yaml",
+            "ecmp-nb-links-external.yaml",
+        ];
+
+        for (wrt_fn, filename) in all_writers_yaml.iter().zip(all_filenames_yaml) {
+            // Clean file
+            let mut file_wrt = std::fs::File::create(Path::new(&args.output_dir).join(filename))?;
+            all_results
+                .iter()
+                .for_each(|res| wrt_fn(res, &mut file_wrt).unwrap())
+        }
     }
 
     Ok(())

@@ -271,7 +271,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
     
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label(ylabel), font)
-    ax.set_xlabel(latex_label('Time (hour)'), font)
+    ax.set_xlabel(latex_label('Day of the week'), font)
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ylim(ymin, ymax)

@@ -30,6 +30,9 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<Ex
                 let loads = val.get_link_loads(None);
                 let loads_ovh = val.get_link_loads(Some(true));
                 let loads_external = val.get_link_loads(Some(false));
+                let nb_ecmp_links = val.get_nb_ecmp_links(None);
+                let nb_ecmp_links_ovh = val.get_nb_ecmp_links(Some(true));
+                let nb_ecmp_links_external = val.get_nb_ecmp_links(Some(false));
                 // Easier, because we should divide by two for internal links, but by 1
                 // for peering links.
                 let nb_links_ovh = nb_links - nb_links_external;
@@ -47,6 +50,9 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<Ex
                     loads,
                     loads_ovh,
                     loads_external,
+                    nb_ecmp_links,
+                    nb_ecmp_links_ovh,
+                    nb_ecmp_links_external,
                     // ..Default::default()  // Just in case we add other fields, the code compiles
                 })
                 .expect("Could not send data");

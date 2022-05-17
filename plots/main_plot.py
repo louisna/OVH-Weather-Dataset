@@ -32,9 +32,10 @@ def main(argv):
     ext = retrieve_extension(args.extension)
 
     if args.metric=="ECMP":
-        plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
-                            "../figures/ecmp-imbalance."+ext)
-        plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
+        #plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
+        #                    "../figures/ecmp-imbalance."+ext)
+        #plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
+        plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-diffs-all.yaml", "../csv/ecmp-diffs-ovh.yaml", "../csv/ecmp-diffs-external.yaml"], ["All", "OVH", "External"], "CDF", "../figures/ecmp-diff-cdf."+ext)
 
     if args.metric == "LOADS":
         # plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)

@@ -158,3 +158,66 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
 
     #save figure
     savefig(output, bbox_inches='tight')
+
+
+def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, ylabel, output):
+    """
+    Plots traffic load over the (almost) two years of data we collected
+
+    Args:
+        csv_files: input CSV files
+        labels: legend labels
+        output: output file name
+    """
+    all_data = list()
+
+    for file in csv_files:
+        data_file = list()
+        with open(file) as fd:
+            for line in tqdm(fd.readlines()):
+                try:
+                    tab = line.split(": [")
+                    # timestamp = datetime.fromtimestamp(timestamp)
+                    data = [int(i) for i in tab[1][:-2].split(",")]
+                    data_file.extend(data)
+                except Exception as e:
+                    print("Exception:", e)
+                    continue
+        all_data.append(data_file)
+    
+    # CDF computation
+    all_bins = list()
+    all_cdfs = list()
+    max_data = 0
+    for data_file in all_data:
+        bins, cdf = compute_cdf(data_file, nb_bins=500)
+        all_bins.append(bins)
+        all_cdfs.append(cdf)
+        max_data = max(max_data, max(data_file))
+
+    # Create figure
+    fig = figure()
+    ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
+
+    # Style
+    colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+    if len(csv_files) == 1:
+        colors[0] = colors[1]
+    lstyles = ["solid", "dotted", "densely dashed"]
+
+    for i, (bins, cdf) in enumerate(zip(all_bins, all_cdfs)):
+        ax.step(bins, cdf, label=labels[i], color=colors[i], lw=2, ls=linestyles[lstyles[i]])
+
+    axis_aesthetic(ax)
+    ax.set_ylabel(latex_label('CDF'), font)
+    ax.set_xlabel(latex_label('ECMP imbalance (\%)'), font)
+
+    # ax.set_xticks(list(range(0, 101, 10)))
+    ax.set_xlim((0, 10))
+
+    ax.grid(True, color='gray', linestyle='dashed')
+
+    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+
+    #save figure
+    savefig(output, bbox_inches='tight')

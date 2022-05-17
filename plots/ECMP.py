@@ -138,7 +138,7 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
             percs = np.percentile(time_data, percentiles)
             for i, perc in enumerate(percs):
                 percentiled_data[i].append(perc)
-    
+
     for i, percentile_data in enumerate(percentiled_data):
         ax.fill_between(all_x[0], percentile_data, color=colors[i], label=f"{percentiles[i]}th")
 
@@ -154,7 +154,7 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(1.01, 1.1), ncol=4, handlelength=3, columnspacing=1)
 
     #save figure
     savefig(output, bbox_inches='tight')

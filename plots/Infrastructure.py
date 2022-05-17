@@ -51,10 +51,12 @@ def plot_node_degree(csv_files, labels, output):
     ax.set_xlabel(latex_label('Node Degree'), font)
 
     ax.set_xticks(list(range(1, max_data + 1, 2)))
+    ax.set_ylim(0, 0.8)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    #legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    ax.legend().set_visible(False)
 
     #save figure
     savefig(output, bbox_inches='tight')
@@ -117,7 +119,10 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    if len(labels)==1:
+        ax.legend().set_visible(False)
+    else:
+        legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
     savefig(output, bbox_inches='tight')

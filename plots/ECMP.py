@@ -36,10 +36,15 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
     dfValues.loc[:,'[0,1[':'[7,100['] = dfValues.loc[:,'[0,1[':'[7,100['].div(dfValues.sum(axis=1), axis=0)
 
     #create subfigures
-    f, ax = plt.subplots(2,1,figsize=(figsize_x,figsize_y))
+    f, ax = plt.subplots(1,1,figsize=(figsize_x,figsize_y))
 
     #global style
     sns.set(style="ticks",context="paper", color_codes=True, font_scale=2, font=font)
+
+    #got time in format YYYY-MM
+    dates = [datetime.fromtimestamp(ts).strftime('%Y-%m') for ts in dfTotal['Time']]
+    dfTotal['Time'] = dates
+    dfTotal.index = pd.to_datetime(dfTotal.index)
 
     ###########################
     # HeatMap                 #
@@ -52,10 +57,10 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
 
     g = sns.heatmap(df, cbar_kws={'label': latex_label('Proportion'), "use_gridspec" : False,
                     "location":"top", "extend":"both", 'anchor':(0.2,0.2)},
-                     xticklabels=empty_date_label, yticklabels=yticklabels_heatmap,
-                     norm=midnorm, cmap='coolwarm', annot=False, ax=ax[0], mask=mask)#, vmin=1, vmax=np.nanmax(df))
+                     xticklabels=dfTotal['Time'], yticklabels=yticklabels_heatmap,
+                     norm=midnorm, cmap='coolwarm', annot=False, ax=ax, mask=mask)#, vmin=1, vmax=np.nanmax(df))
 
-    ax[0].invert_yaxis()
+    ax.invert_yaxis()
 
     g.set_ylabel(latex_label('Imbalance (\%age)'), fontsize=FONT_SIZE)
     sns.despine(offset=10, top=True, right=True, left=False, bottom=False)
@@ -64,30 +69,33 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
     g.figure.axes[-1].xaxis.label.set_size(FONT_SIZE)
     g.collections[0].colorbar.ax.tick_params(labelsize=FONT_SIZE_TICKS)
 
-    ax[0].tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
-    ax[0].tick_params(direction='inout', length=4, width=2)
+    ax.tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
+    ax.tick_params(direction='inout', length=4, width=2)
+
+    ax.set_xlabel(latex_label('Time'), font)
+    ax.tick_params(axis='x', labelrotation=45)
 
     ###########################
     # BarPlot                 #
     ###########################
     #got time in format YYYY-MM
-    dates = [datetime.fromtimestamp(ts).strftime('%Y-%m') for ts in dfTotal['Time']]
-    dfTotal['Time'] = dates
-    dfTotal.index = pd.to_datetime(dfTotal.index)
+    #dates = [datetime.fromtimestamp(ts).strftime('%Y-%m') for ts in dfTotal['Time']]
+    #dfTotal['Time'] = dates
+    #dfTotal.index = pd.to_datetime(dfTotal.index)
 
-    dfTotal.plot(x='Time', y='Total', kind='bar', legend=False, ax=ax[1])
+    #dfTotal.plot(x='Time', y='Total', kind='bar', legend=False, ax=ax[1])
 
-    ax[1].semilogy()
-    ax[1].set_ylim(1, max_ylim_total)
+    #ax[1].semilogy()
+    #ax[1].set_ylim(1, max_ylim_total)
 
-    axis_aesthetic(ax[1])
+    #axis_aesthetic(ax[1])
 
-    ax[1].set_xlabel(latex_label('Time'), font)
-    ax[1].set_ylabel(latex_label("Raw Number"), font)
-    ax[1].tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
-    ax[1].tick_params(axis='x', labelrotation=45)
+    #ax[1].set_xlabel(latex_label('Time'), font)
+    #ax[1].set_ylabel(latex_label("Raw Number"), font)
+    #ax[1].tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
+    #ax[1].tick_params(axis='x', labelrotation=45)
 
-    ax[1].grid(True, color='gray', linestyle='dashed')
+    #ax[1].grid(True, color='gray', linestyle='dashed')
 
     savefig(output, bbox_inches='tight')
 
@@ -184,7 +192,7 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
                     print("Exception:", e)
                     continue
         all_data.append(data_file)
-    
+
     # CDF computation
     all_bins = list()
     all_cdfs = list()

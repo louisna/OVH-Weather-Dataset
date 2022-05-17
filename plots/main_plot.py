@@ -35,13 +35,13 @@ def main(argv):
         plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
                             "../figures/ecmp-imbalance."+ext)
         #plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
-        # plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-diffs-all.yaml", "../csv/ecmp-diffs-ovh.yaml", "../csv/ecmp-diffs-external.yaml"], ["All", r"\textsc{OVH}", "External"], "ECMP imbalance (\%)", "../figures/ecmp-diff-cdf."+ext, (0, 10))
-        #plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-nb-links-all.yaml", "../csv/ecmp-nb-links-ovh.yaml", "../csv/ecmp-nb-links-external.yaml"], ["All", r"\textsc{OVH}", "External"], "Nb ECMP links", "../figures/ecmp-nb-links-cdf."+ext, (0, 20))
+        # plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-diffs-all.yaml", "../csv/ecmp-diffs-ovh.yaml", "../csv/ecmp-diffs-external.yaml"], ["All", "Internal", "Peering"], "ECMP imbalance (\%)", "../figures/ecmp-diff-cdf."+ext, (0, 10))
+        #plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-nb-links-all.yaml", "../csv/ecmp-nb-links-ovh.yaml", "../csv/ecmp-nb-links-external.yaml"], ["All", "Internal", "Peering"], "Nb ECMP links", "../figures/ecmp-nb-links-cdf."+ext, (0, 20))
 
     if args.metric == "LOADS":
         # plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)
         plot_load_boxplot_week(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts."+ext, 0, 100)
-        plot_all_loads_in_cdf(["../csv/loads-all.yaml", "../csv/loads-ovh.yaml", "../csv/loads-external.yaml"], ["All", r"\textsc{OVH}", "Peering"], "CDF", "../figures/load-cdf."+ext)
+        plot_all_loads_in_cdf(["../csv/loads-all.yaml", "../csv/loads-ovh.yaml", "../csv/loads-external.yaml"], ["All", "Internal", "Peering"], "CDF", "../figures/load-cdf."+ext)
         plot_one_boxplot_per_day(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts-week."+ext, 0, 100)
 
     if args.metric=="Infrastructure":

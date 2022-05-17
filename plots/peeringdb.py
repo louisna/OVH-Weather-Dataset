@@ -112,7 +112,7 @@ def plot_peering_db_example(csv_files, output):
         all_data_down.append(data_file_down)
         all_x.append(x)
     
-    fig = figure(figsize=(6.4,3.8))
+    fig = figure(figsize=(8,3.8))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Assume there is only one file
@@ -130,10 +130,10 @@ def plot_peering_db_example(csv_files, output):
             ax.annotate('Link addition',
                                 xy=([datetime.fromtimestamp(idx_first_0.timestamp() - 10000)],25),
                                 xycoords='data',
-                                xytext=(0.013, 0.22),
+                                xytext=(0.205, 0.23),
                                 textcoords='axes fraction',
                                 arrowprops=dict(facecolor='black', shrink=0.05, width=0.75, headwidth=7),
-                                horizontalalignment='left',
+                                horizontalalignment='right',
                                 verticalalignment='top',
                                 fontsize=20
                             )

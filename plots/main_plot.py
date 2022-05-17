@@ -58,7 +58,7 @@ def main(argv):
         plot_interval_dataset("../figures/files_distance."+ext)
     
     if args.metric == "Peering":
-        plot_peering_db_example(["../csv/AMS-IX_ams-5-n7.csv"], "../figures/peering-db-example.".ext)
+        plot_peering_db_example(["../csv/AMS-IX_ams-5-n7.csv"], "../figures/peering-db-example."+ext)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

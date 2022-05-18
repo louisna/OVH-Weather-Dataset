@@ -126,8 +126,8 @@ def plot_peering_db_example(csv_files, output):
             x_values = all_x[0][-len(tmp):]
             # Plot the moment when the link has been added
             idx_first_0 = x_values[0]
-            ax.vlines([idx_first_0], -10, 100, colors=["red"], linestyle="dashed", linewidth=3)
-            ax.annotate('A',
+            ax.vlines([idx_first_0], -10, 100, colors=["black"], linestyle="dashed", linewidth=3)
+            ax.annotate(r'\textit{A}',
                                 xy=([datetime.fromtimestamp(idx_first_0.timestamp() - 10000)],15),
                                 xycoords='data',
                                 xytext=(0.15, 0.15),
@@ -142,7 +142,7 @@ def plot_peering_db_example(csv_files, output):
             i_first_1 = tmp.index(1)
             idx_first_1 = x_values[i_first_1]
             # ax.vlines([idx_first_1], -10, 100, colors=["red"], linestyle="dashed")
-            ax.annotate('C',
+            ax.annotate(r'\textit{C}',
                                 xy=([datetime.fromtimestamp(idx_first_1.timestamp() + 10000)],15),
                                 xycoords='data',
                                 xytext=(0.59, 0.15),
@@ -161,8 +161,8 @@ def plot_peering_db_example(csv_files, output):
 
     peeringdb = 1646970358
     peering_dt = datetime.fromtimestamp(peeringdb)
-    ax.vlines(peering_dt, 0, 100, colors=['r'], linewidth=3)
-    ax.annotate('B',
+    ax.vlines(peering_dt, 0, 100, colors=['black'], linewidth=3, linestyle="dashed")
+    ax.annotate(r'\textit{B}',
             xy=(datetime.fromtimestamp(peeringdb - 10000),15),
             xycoords='data',
             xytext=(0.4, 0.15),

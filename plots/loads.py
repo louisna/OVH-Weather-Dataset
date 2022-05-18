@@ -39,8 +39,8 @@ def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
                 x.append(timestamp)
         all_x.append(x)
         all_data.append(data_file)
-    
-    fig = figure()
+
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
@@ -53,7 +53,7 @@ def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
             percs = np.percentile(time_data, percentiles)
             for i, perc in enumerate(percs):
                 percentiled_data[i].append(perc)
-    
+
     for i, percentile_data in enumerate(percentiled_data):
         ax.fill_between(all_x[0], percentile_data, color=colors[i], label=f"{percentiles[i]}th")
 
@@ -155,14 +155,14 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
         all_data = cbook.boxplot_stats(all_data_aggregated[0].values(), labels=all_data_aggregated[0].keys(), whis=(1, 99))
         with open(pickle_filename, "wb+") as fd:
             pickle.dump((all_data, all_x, max_values), fd)
-    
-    fig = figure()
+
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
     lstyles = ["solid", "dotted", "densely dashed"]
     medianprops = dict(linewidth=3.5, color=colors[1])
-    
+
     #all_data_aggregated = []
     #for x, d in tqdm(zip(all_x, all_data)):
     #     all_data_aggregated.append(aggregate_week_day_hours(x, d))
@@ -182,7 +182,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
     plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
     ax.set_xticks(hours)
     ax.set_xticklabels(list(range(24))[::2])
-    
+
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label(ylabel), font)
     ax.set_xlabel(latex_label('Time (hour)'), font)
@@ -246,14 +246,14 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
         all_data = cbook.boxplot_stats(all_data_aggregated[0].values(), labels=all_data_aggregated[0].keys(), whis=(1, 99))
         with open(pickle_filename, "wb+") as fd:
             pickle.dump((all_data, all_x, max_values), fd)
-    
-    fig = figure()
+
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
     lstyles = ["solid", "dotted", "dashed"]
     medianprops = dict(linewidth=3.5, color=colors[1])
-    
+
     all_data = sorted(all_data, key=lambda i: i["label"])
     print(all_data)
     bplot = ax.bxp(all_data, showfliers=False, medianprops=medianprops, patch_artist=True)
@@ -268,7 +268,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
     plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
     # ax.set_xticklabels(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
     ax.set_xticklabels(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"])
-    
+
     axis_aesthetic(ax)
     ax.set_ylabel(latex_label(ylabel), font)
     ax.set_xlabel(latex_label('Day of the week'), font)
@@ -282,7 +282,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
 
     #save figure
     savefig(output, bbox_inches='tight')
-    
+
 
 def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
     """
@@ -308,7 +308,7 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
                     print("Exception:", e)
                     continue
         all_data.append(data_file)
-    
+
     # Flatten all lists into a major list
     all_data_flatten = list()
     for data_file in all_data:
@@ -316,7 +316,7 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
         for data in data_file:
             data_flatten += data
         all_data_flatten.append(data_flatten)
-    
+
     # CDF computation
     all_bins = list()
     all_cdfs = list()
@@ -328,7 +328,7 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
         max_data = max(max_data, max(data_file))
 
     # Create figure
-    fig = figure()
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Style

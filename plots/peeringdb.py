@@ -49,7 +49,7 @@ for peering in ["AMS-IX_ams-1-n7", "AMS-IX_ams-5-n7"]:
                             break
 
 
-    peeringdb = 1646970358.0 
+    peeringdb = 1646970358.0
     ax.vlines(peeringdb, 0, 100, colors=['r'])
     ax.annotate('PeeringDB update',
             xy=(peeringdb,75),
@@ -67,7 +67,7 @@ for peering in ["AMS-IX_ams-1-n7", "AMS-IX_ams-5-n7"]:
         ax.xaxis.set_visible(False)
     else:
         ax.set_xlabel("Time")
-        
+
         l = len(header)
         idx = [0, int(l/4), int(l/2), int(l*3/4), l-1]
         print(idx)
@@ -111,8 +111,8 @@ def plot_peering_db_example(csv_files, output):
         all_data_up.append(data_file_up)
         all_data_down.append(data_file_down)
         all_x.append(x)
-    
-    fig = figure(figsize=(8,3.8))
+
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Assume there is only one file
@@ -157,7 +157,7 @@ def plot_peering_db_example(csv_files, output):
 
         else:
             ax.plot(all_x[0], values[1], label=f"\#{values[0][-1]}", color=colors[i])
-    
+
     peeringdb = 1646970358
     peering_dt = datetime.fromtimestamp(peeringdb)
     ax.vlines(peering_dt, 0, 100, colors=['r'])

@@ -131,7 +131,7 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
         all_data.append(data_file)
 
     #create figure
-    fig = figure()
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
@@ -204,7 +204,7 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
         max_data = max(max_data, max(data_file))
 
     # Create figure
-    fig = figure()
+    fig = figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Style

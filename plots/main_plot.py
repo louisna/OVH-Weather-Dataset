@@ -33,10 +33,10 @@ def main(argv):
     ext = retrieve_extension(args.extension)
 
     if args.metric=="ECMP":
-        plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
-                            "../figures/ecmp-imbalance."+ext)
+        #plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
+        #                    "../figures/ecmp-imbalance."+ext)
         #plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
-        # plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-diffs-all.yaml", "../csv/ecmp-diffs-ovh.yaml", "../csv/ecmp-diffs-external.yaml"], ["All", "Internal", "External"], "ECMP imbalance (\%)", "../figures/ecmp-diff-cdf."+ext, (0, 10))
+        plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-diffs-all.yaml", "../csv/ecmp-diffs-ovh.yaml", "../csv/ecmp-diffs-external.yaml"], ["All", "Internal", "External"], "ECMP imbalance (\%)", "../figures/ecmp-diff-cdf."+ext, (0, 10))
         #plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-nb-links-all.yaml", "../csv/ecmp-nb-links-ovh.yaml", "../csv/ecmp-nb-links-external.yaml"], ["All", "Internal", "External"], "Nb ECMP links", "../figures/ecmp-nb-links-cdf."+ext, (0, 20))
 
     if args.metric == "LOADS":
@@ -56,7 +56,7 @@ def main(argv):
     if args.metric=="Timeline":
         #plot_timeline_dataset("../figures/timeline."+ext)
         plot_interval_dataset("../figures/files_distance."+ext)
-    
+
     if args.metric == "Peering":
         plot_peering_db_example(["../csv/AMS-IX_ams-5-n7.csv"], "../figures/peering-db-example."+ext)
 

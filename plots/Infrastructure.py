@@ -34,7 +34,7 @@ def plot_node_degree(csv_files, labels, output):
         max_data = max(max_data, max(data))
 
     #create figure
-    fig = figure(figsize=(8,4))
+    fig = figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
@@ -86,7 +86,7 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
             all_data.append(y)
 
     #create figure
-    fig = figure(figsize=(8,4))
+    fig = figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
@@ -122,7 +122,7 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
     if len(labels)==1:
         ax.legend().set_visible(False)
     else:
-        legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.85, 1.15), ncol=3, handlelength=3)
+        legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.023, 1.22), ncol=3, handlelength=2)
 
     #save figure
     savefig(output, bbox_inches='tight')

@@ -49,7 +49,7 @@ def main(argv):
         plot_infra_evol(["../csv/nb-nodes-ovh.csv"],
         '\# Routers', [r"\textsc{OVH}"] , "../figures/nb-nodes-evolution."+ext, 108, 124)
         plot_infra_evol(["../csv/nb-links-all.csv", "../csv/nb-links-ovh.csv", "../csv/nb-links-external.csv"],
-        '\# Links', ['All', 'Internal', 'Peering'] , "../figures/nb-links-evolution."+ext, 100, 1000)
+        '\# Links', ['All', 'Internal', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1000)
         plot_node_degree(["../csv/static_node_degree_internal.csv"],
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 

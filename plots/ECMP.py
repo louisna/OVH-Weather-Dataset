@@ -204,7 +204,7 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
         max_data = max(max_data, max(data_file))
 
     # Create figure
-    fig = figure(figsize=(8,4))
+    fig = figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Style
@@ -222,10 +222,11 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
 
     # ax.set_xticks(list(range(0, 101, 10)))
     ax.set_xlim(xlim)
+    ylim(0, 1.01)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.018, 1.21), ncol=3, handlelength=2)
 
     #save figure
     savefig(output, bbox_inches='tight')

@@ -112,7 +112,7 @@ def plot_peering_db_example(csv_files, output):
         all_data_down.append(data_file_down)
         all_x.append(x)
 
-    fig = figure(figsize=(8,4))
+    fig = figure(figsize=(9, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Assume there is only one file
@@ -126,7 +126,7 @@ def plot_peering_db_example(csv_files, output):
             x_values = all_x[0][-len(tmp):]
             # Plot the moment when the link has been added
             idx_first_0 = x_values[0]
-            ax.vlines([idx_first_0], -10, 100, colors=["red"], linestyle="dashed")
+            ax.vlines([idx_first_0], -10, 100, colors=["red"], linestyle="dashed", linewidth=3)
             ax.annotate('A',
                                 xy=([datetime.fromtimestamp(idx_first_0.timestamp() - 10000)],15),
                                 xycoords='data',
@@ -138,9 +138,10 @@ def plot_peering_db_example(csv_files, output):
                                 fontsize=20
                             )
             # Plot the moment when the link is activated
+            # We do not plot finally
             i_first_1 = tmp.index(1)
             idx_first_1 = x_values[i_first_1]
-            ax.vlines([idx_first_1], -10, 100, colors=["red"], linestyle="dashed")
+            # ax.vlines([idx_first_1], -10, 100, colors=["red"], linestyle="dashed")
             ax.annotate('C',
                                 xy=([datetime.fromtimestamp(idx_first_1.timestamp() + 10000)],15),
                                 xycoords='data',
@@ -153,14 +154,14 @@ def plot_peering_db_example(csv_files, output):
                             )
 
             # Plot the link load
-            ax.plot(x_values, tmp, label=f"\#{values[0][-1]}", color=colors[i])
+            ax.plot(x_values, tmp, label=f"\#{values[0][-1]}", color=colors[i], linewidth=4)
 
         else:
             ax.plot(all_x[0], values[1], label=f"\#{values[0][-1]}", color=colors[i])
 
     peeringdb = 1646970358
     peering_dt = datetime.fromtimestamp(peeringdb)
-    ax.vlines(peering_dt, 0, 100, colors=['r'])
+    ax.vlines(peering_dt, 0, 100, colors=['r'], linewidth=3)
     ax.annotate('B',
             xy=(datetime.fromtimestamp(peeringdb - 10000),15),
             xycoords='data',
@@ -185,5 +186,10 @@ def plot_peering_db_example(csv_files, output):
     ax.grid(True, color='gray', linestyle='dashed')
     ylim(-1, 70)
 
-    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(1.01, 1.1), ncol=5, handlelength=3, columnspacing=1)
+    # Change legend order to show in last the added link
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = list(range(1, len(all_data_up[0]))) + [0]
+
+
+    legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(0.95, 1.2), ncol=5, handlelength=2, columnspacing=1)
     savefig(output, bbox_inches='tight')

@@ -156,7 +156,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
         with open(pickle_filename, "wb+") as fd:
             pickle.dump((all_data, all_x, max_values), fd)
 
-    fig = figure(figsize=(8,4))
+    fig = figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
@@ -328,7 +328,7 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
         max_data = max(max_data, max(data_file))
 
     # Create figure
-    fig = figure(figsize=(8,4))
+    fig = figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Style
@@ -346,11 +346,11 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
 
     ax.set_xticks(list(range(0, 101, 10)))
 
+    ylim(0, 1.01)
+
     ax.grid(True, color='gray', linestyle='dashed')
 
-    ylim(0, 1.1)
-
-    legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=4)
+    legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.018, 1.21), ncol=3, handlelength=2)
 
     #save figure
     savefig(output, bbox_inches='tight')

@@ -128,9 +128,9 @@ def plot_peering_db_example(csv_files, output):
             idx_first_0 = x_values[0]
             ax.vlines([idx_first_0], -10, 100, colors=["red"], linestyle="dashed")
             ax.annotate('A',
-                                xy=([datetime.fromtimestamp(idx_first_0.timestamp() - 10000)],25),
+                                xy=([datetime.fromtimestamp(idx_first_0.timestamp() - 10000)],15),
                                 xycoords='data',
-                                xytext=(0.15, 0.25),
+                                xytext=(0.15, 0.15),
                                 textcoords='axes fraction',
                                 arrowprops=dict(facecolor='black', shrink=0.05, width=0.75, headwidth=7),
                                 horizontalalignment='right',
@@ -142,9 +142,9 @@ def plot_peering_db_example(csv_files, output):
             idx_first_1 = x_values[i_first_1]
             ax.vlines([idx_first_1], -10, 100, colors=["red"], linestyle="dashed")
             ax.annotate('C',
-                                xy=([datetime.fromtimestamp(idx_first_1.timestamp() + 10000)],25),
+                                xy=([datetime.fromtimestamp(idx_first_1.timestamp() + 10000)],15),
                                 xycoords='data',
-                                xytext=(0.59, 0.25),
+                                xytext=(0.59, 0.15),
                                 textcoords='axes fraction',
                                 arrowprops=dict(facecolor='black', shrink=0.09, width=0.75, headwidth=7),
                                 horizontalalignment='left',
@@ -162,9 +162,9 @@ def plot_peering_db_example(csv_files, output):
     peering_dt = datetime.fromtimestamp(peeringdb)
     ax.vlines(peering_dt, 0, 100, colors=['r'])
     ax.annotate('B',
-            xy=(datetime.fromtimestamp(peeringdb - 10000),25),
+            xy=(datetime.fromtimestamp(peeringdb - 10000),15),
             xycoords='data',
-            xytext=(0.4, 0.25),
+            xytext=(0.4, 0.15),
             textcoords='axes fraction',
             arrowprops=dict(facecolor='black', shrink=0.05, width=0.75, headwidth=7),
             horizontalalignment='right',

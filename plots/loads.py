@@ -69,7 +69,7 @@ def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
     savefig(output, bbox_inches='tight')
@@ -192,7 +192,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    # legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    # legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
     savefig(output, bbox_inches='tight')
@@ -278,7 +278,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    # legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    # legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
     savefig(output, bbox_inches='tight')
@@ -348,7 +348,9 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-5, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    ylim(0, 1.1)
+
+    legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=4)
 
     #save figure
     savefig(output, bbox_inches='tight')

@@ -45,7 +45,7 @@ def plot_interval_dataset(output):
         all_distances = yaml.load(f, Loader=Loader)
 
     #style
-    lstyles = ["solid", "dotted", "dashed", "dashdotted"]
+    lstyles = ["solid", "densely dotted", "dashed", "densely dashdotted"]
 
     for (data_dir, distances), c, l in zip(all_distances.items(), colors, lstyles):
         plt.plot(list(sorted(distances)), [x / len(distances) for x in range(len(distances))], label=maps[data_dir], color=c, lw=2, ls=linestyles[l])
@@ -74,7 +74,7 @@ def plot_interval_dataset(output):
 
     #axis limits
     plt.xlim(250, 60*60*4)
-    plt.ylim(0, 1)
+    plt.ylim(0.00001, 0.99999)
 
     legend(fontsize=FONT_SIZE_LEGEND, handlelength=3, ncol=2, loc='lower right')
     ax.grid(True, color='gray', linestyle='dashed')

@@ -41,7 +41,7 @@ def main(argv):
 
     if args.metric == "LOADS":
         # plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)
-        # plot_load_boxplot_week(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts."+ext, 0, 100)
+        plot_load_boxplot_week(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts."+ext, 0, 100)
         plot_all_loads_in_cdf(["../csv/loads-all.yaml", "../csv/loads-ovh.yaml", "../csv/loads-external.yaml"], ["All", "Internal", "External"], "CDF", "../figures/load-cdf."+ext)
         # plot_one_boxplot_per_day(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts-week."+ext, 0, 100)
 
@@ -54,7 +54,7 @@ def main(argv):
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
-        #plot_timeline_dataset("../figures/timeline."+ext)
+        # plot_timeline_dataset("../figures/timeline."+ext)
         plot_interval_dataset("../figures/files_distance."+ext)
 
     if args.metric == "Peering":

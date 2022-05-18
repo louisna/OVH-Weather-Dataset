@@ -154,10 +154,10 @@ def plot_peering_db_example(csv_files, output):
                             )
 
             # Plot the link load
-            ax.plot(x_values, tmp, label=f"\#{values[0][-1]}", color=colors[i], linewidth=4)
+            ax.plot(x_values, tmp, label=f"New link", color=colors[i], linewidth=4)
 
         else:
-            ax.plot(all_x[0], values[1], label=f"\#{values[0][-1]}", color=colors[i])
+            ax.plot(all_x[0], values[1], label=f"Link \#{values[0][-1]}", color=colors[i])
 
     peeringdb = 1646970358
     peering_dt = datetime.fromtimestamp(peeringdb)
@@ -191,5 +191,5 @@ def plot_peering_db_example(csv_files, output):
     order = list(range(1, len(all_data_up[0]))) + [0]
 
 
-    legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(0.95, 1.2), ncol=5, handlelength=2, columnspacing=1)
+    legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(0.95, 1.33), ncol=3, handlelength=2, columnspacing=1)
     savefig(output, bbox_inches='tight')

@@ -127,10 +127,10 @@ def plot_peering_db_example(csv_files, output):
             # Plot the moment when the link has been added
             idx_first_0 = x_values[0]
             ax.vlines([idx_first_0], -10, 100, colors=["red"], linestyle="dashed")
-            ax.annotate('Link addition',
+            ax.annotate('A',
                                 xy=([datetime.fromtimestamp(idx_first_0.timestamp() - 10000)],25),
                                 xycoords='data',
-                                xytext=(0.205, 0.23),
+                                xytext=(0.15, 0.25),
                                 textcoords='axes fraction',
                                 arrowprops=dict(facecolor='black', shrink=0.05, width=0.75, headwidth=7),
                                 horizontalalignment='right',
@@ -141,10 +141,10 @@ def plot_peering_db_example(csv_files, output):
             i_first_1 = tmp.index(1)
             idx_first_1 = x_values[i_first_1]
             ax.vlines([idx_first_1], -10, 100, colors=["red"], linestyle="dashed")
-            ax.annotate('Link activation',
-                                xy=([datetime.fromtimestamp(idx_first_1.timestamp() + 10000)],18),
+            ax.annotate('C',
+                                xy=([datetime.fromtimestamp(idx_first_1.timestamp() + 10000)],25),
                                 xycoords='data',
-                                xytext=(0.59, 0.1),
+                                xytext=(0.59, 0.25),
                                 textcoords='axes fraction',
                                 arrowprops=dict(facecolor='black', shrink=0.09, width=0.75, headwidth=7),
                                 horizontalalignment='left',
@@ -161,10 +161,10 @@ def plot_peering_db_example(csv_files, output):
     peeringdb = 1646970358
     peering_dt = datetime.fromtimestamp(peeringdb)
     ax.vlines(peering_dt, 0, 100, colors=['r'])
-    ax.annotate('PeeringDB update',
-            xy=(datetime.fromtimestamp(peeringdb - 10000),20),
+    ax.annotate('B',
+            xy=(datetime.fromtimestamp(peeringdb - 10000),25),
             xycoords='data',
-            xytext=(0.46, 0.12),
+            xytext=(0.4, 0.25),
             textcoords='axes fraction',
             arrowprops=dict(facecolor='black', shrink=0.05, width=0.75, headwidth=7),
             horizontalalignment='right',

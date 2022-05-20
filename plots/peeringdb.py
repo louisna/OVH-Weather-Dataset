@@ -174,7 +174,7 @@ def plot_peering_db_example(csv_files, output):
     )
 
     axis_aesthetic(ax)
-    ax.set_ylabel(latex_label("Load (\%)"), font)
+    ax.set_ylabel(latex_label("Links load (\%)"), font)
     ax.set_xlabel(latex_label('Time'), font)
     myFmt = mdates.DateFormatter('%m-%d')
     ax.xaxis.set_major_formatter(myFmt)

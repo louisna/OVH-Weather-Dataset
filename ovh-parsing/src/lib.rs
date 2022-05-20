@@ -18,6 +18,11 @@ pub struct FileMetadata {
     pub timestamp: NaiveDateTime,
 }
 
+pub enum OvhNodeFilter {
+    All,
+    OVH
+}
+
 impl FileMetadata {
     pub fn path_to_file_metadata(pathbuf: &Path) -> Option<FileMetadata> {
         let timestamp_str = match pathbuf.file_name() {
@@ -52,7 +57,7 @@ pub fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), 
 }
 
 fn is_peer_from_name(name: &str) -> bool {
-    let str_split: Vec<&str> = name.split("#").collect();
+    let str_split: Vec<&str> = name.split('#').collect();
         str_split[0].to_uppercase() == str_split[0]
 }
 
@@ -76,7 +81,7 @@ impl Router {
     pub fn has_external(&self) -> bool {
         self.peers
             .iter()
-            .map(|(peer_name, _)| is_peer_from_name(&peer_name))
+            .map(|(peer_name, _)| is_peer_from_name(peer_name))
             .any(|x| x)
     }
 

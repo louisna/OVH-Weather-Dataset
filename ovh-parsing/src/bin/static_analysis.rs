@@ -3,7 +3,7 @@ use ovh_parsing::{parse_yaml, write_in_csv, Link, Router, OvhData};
 use std::env;
 use std::error::Error;
 
-fn static_node_degree(data: &[&Router], output_csv: &str) -> Result<(), Box<dyn Error>> {
+fn _static_node_degree(data: &[&Router], output_csv: &str) -> Result<(), Box<dyn Error>> {
     let res = data.iter().map(|&router| router.peers.len()).collect();
 
     write_in_csv(res, output_csv)

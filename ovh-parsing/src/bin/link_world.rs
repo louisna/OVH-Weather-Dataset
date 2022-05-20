@@ -11,7 +11,9 @@ fn try_and_connect_network(europe: OvhData, america: OvhData, asia: OvhData, wor
 
     for map in maps {
         for (router_name, router) in map.data { // Consume the values
-            if total.contains_key(&router_name) {
+            if let std::collections::hash_map::Entry::Vacant(e) = total.entry(router_name.to_string()) {
+                e.insert(router);
+            } else {
                 let router_exists = total.get_mut(&router_name).unwrap();
                 for (peer_name, peer_links) in router.peers {
                     if router_exists.peers.contains_key(&peer_name) {
@@ -28,9 +30,6 @@ fn try_and_connect_network(europe: OvhData, america: OvhData, asia: OvhData, wor
                         router_exists.peers.insert(peer_name, peer_links);
                     }
                 }
-            } else {
-                // Router does not exist in the total variable, just add it
-                total.insert(router_name, router); // Give ownership
             }
         }
     }

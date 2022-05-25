@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use ovh_parsing::{parse_yaml, write_in_csv, Link, Router, OvhData};
+use ovh_parsing::{parse_yaml, write_in_csv, Link, Router, OvhData, OvhNodeFilter};
 use std::env;
 use std::error::Error;
 
@@ -29,7 +29,7 @@ fn static_nb_ecmp_links_mean(data: &[&Router]) -> f64 {
 }
 
 fn static_nb_ecmp_total_mean(data: &OvhData) -> f64 {
-    data.get_nb_links(Some(true)) as f64 / data.get_nb_nodes(Some(true)) as f64
+    data.get_nb_links(OvhNodeFilter::Ovh) as f64 / data.get_nb_nodes(OvhNodeFilter::Ovh) as f64
 }
 
 fn main() {

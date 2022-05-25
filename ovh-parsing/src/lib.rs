@@ -20,7 +20,8 @@ pub struct FileMetadata {
 
 pub enum OvhNodeFilter {
     All,
-    OVH
+    Ovh,
+    External,
 }
 
 impl FileMetadata {
@@ -161,14 +162,14 @@ impl ExperimentResults {
     pub fn write_csv_nb_nodes(
         &self,
         wrt: &mut Writer<File>,
-        ovh_nodes: Option<bool>,
+        ovh_nodes: OvhNodeFilter,
     ) -> Result<(), csv::Error> {
         wrt.serialize((
             &self.timestamp.timestamp(),
             match ovh_nodes {
-                Some(true) => self.nb_nodes_ovh,
-                Some(false) => self.nb_nodes_external,
-                None => self.nb_nodes,
+                OvhNodeFilter::Ovh => self.nb_nodes_ovh,
+                OvhNodeFilter::External => self.nb_nodes_external,
+                OvhNodeFilter::All => self.nb_nodes,
             },
         ))
     }
@@ -176,14 +177,14 @@ impl ExperimentResults {
     pub fn write_csv_nb_links(
         &self,
         wrt: &mut Writer<File>,
-        ovh_nodes: Option<bool>,
+        ovh_nodes: OvhNodeFilter,
     ) -> Result<(), csv::Error> {
         wrt.serialize((
             &self.timestamp.timestamp(),
             match ovh_nodes {
-                Some(true) => self.nb_links_ovh,
-                Some(false) => self.nb_links_external,
-                None => self.nb_links,
+                OvhNodeFilter::Ovh => self.nb_links_ovh,
+                OvhNodeFilter::External => self.nb_links_external,
+                OvhNodeFilter::All => self.nb_links,
             },
         ))
     }
@@ -191,12 +192,12 @@ impl ExperimentResults {
     pub fn write_yaml_ecmp_diff(
         &self,
         file_wrt: &mut File,
-        ovh_nodes: Option<bool>,
+        ovh_nodes: OvhNodeFilter,
     ) -> Result<(), std::io::Error> {
         let ecmp_values = match ovh_nodes {
-            Some(true) => &self.ecmp_diffs_ovh,
-            Some(false) => &self.ecmp_diffs_external,
-            None => &self.ecmp_diffs,
+            OvhNodeFilter::Ovh => &self.ecmp_diffs_ovh,
+            OvhNodeFilter::External => &self.ecmp_diffs_external,
+            OvhNodeFilter::All => &self.ecmp_diffs,
         };
         let j_value = json_to_string(ecmp_values).unwrap();
         let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
@@ -207,12 +208,12 @@ impl ExperimentResults {
     pub fn write_yaml_nb_ecmp_links(
         &self,
         file_wrt: &mut File,
-        ovh_nodes: Option<bool>,
+        ovh_nodes: OvhNodeFilter,
     ) -> Result<(), std::io::Error> {
         let ecmp_values = match ovh_nodes {
-            Some(true) => &self.nb_ecmp_links_ovh,
-            Some(false) => &self.nb_ecmp_links_external,
-            None => &self.nb_ecmp_links,
+            OvhNodeFilter::Ovh => &self.nb_ecmp_links_ovh,
+            OvhNodeFilter::External => &self.nb_ecmp_links_external,
+            OvhNodeFilter::All => &self.nb_ecmp_links,
         };
         let j_value = json_to_string(ecmp_values).unwrap();
         let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
@@ -223,12 +224,12 @@ impl ExperimentResults {
     pub fn write_yaml_load(
         &self,
         file_wrt: &mut File,
-        ovh_nodes: Option<bool>,
+        ovh_nodes: OvhNodeFilter,
     ) -> Result<(), std::io::Error> {
         let ecmp_values = match ovh_nodes {
-            Some(true) => &self.loads_ovh,
-            Some(false) => &self.loads_external,
-            None => &self.loads,
+            OvhNodeFilter::Ovh => &self.loads_ovh,
+            OvhNodeFilter::External => &self.loads_external,
+            OvhNodeFilter::All => &self.loads,
         };
         let j_value = json_to_string(ecmp_values).unwrap();
         let j_key = json_to_string(&self.timestamp.timestamp()).unwrap();
@@ -278,29 +279,29 @@ impl OvhData {
         }
     }
 
-    pub fn get_nb_nodes(&self, ovh_nodes: Option<bool>) -> i32 {
+    pub fn get_nb_nodes(&self, ovh_nodes: OvhNodeFilter) -> i32 {
         match ovh_nodes {
-            Some(true) => self.get_internal_routers().len() as i32,
-            Some(false) => self.get_peering_routers().len() as i32,
-            None => self.data.len() as i32,
+            OvhNodeFilter::Ovh => self.get_internal_routers().len() as i32,
+            OvhNodeFilter::External => self.get_peering_routers().len() as i32,
+            OvhNodeFilter::All => self.data.len() as i32,
         }
     }
 
-    pub fn get_nb_links(&self, ovh_nodes: Option<bool>) -> i32 {
+    pub fn get_nb_links(&self, ovh_nodes: OvhNodeFilter) -> i32 {
         (self
             .data
             .values()
             .filter(|router| match ovh_nodes {
-                Some(true) => !router.is_external(),
-                Some(false) => router.is_external(),
-                None => true,
+                OvhNodeFilter::Ovh => !router.is_external(),
+                OvhNodeFilter::External => router.is_external(),
+                OvhNodeFilter::All => true,
             })
             .map(|router| {
                 router
                     .peers
                     .iter()
                     .filter(|(peer_name, _)| match ovh_nodes {
-                        Some(true) => !is_peer_from_name(peer_name),
+                        OvhNodeFilter::Ovh => !is_peer_from_name(peer_name),
                         _ => true,
                     })
                     .map(|(_, peering)| peering.len())
@@ -308,7 +309,7 @@ impl OvhData {
             })
             .sum::<usize>()
             / match ovh_nodes {
-                Some(false) => 1, //
+                OvhNodeFilter::External => 1, //
                 _ => 2,
             }) as i32
     }
@@ -318,19 +319,19 @@ impl OvhData {
     /// We do *not* take into account the loads of:
     ///     - 0%: no traffic, unused link,
     ///     - 1%: assume that it represents only traffic control
-    pub fn get_ecmp_imbalance(&self, ovh_nodes: Option<bool>) -> Vec<i8> {
+    pub fn get_ecmp_imbalance(&self, ovh_nodes: OvhNodeFilter) -> Vec<i8> {
         // I first made it using functional programming, but it is way cleaner like this
         let mut output: Vec<i8> = Vec::with_capacity(self.data.len()); // Random initialization
         for router in self.data.values().filter(|&r| match ovh_nodes {
-            Some(true) => !r.is_external(),
-            Some(false) => r.is_external(),
-            None => true,
+            OvhNodeFilter::Ovh => !r.is_external(),
+            OvhNodeFilter::External => r.is_external(),
+            OvhNodeFilter::All => true,
         }) {
             for (_, peer_links) in router
                 .peers
                 .iter()
                 .filter(|(peer_name, _)| match ovh_nodes {
-                    Some(true) => &&peer_name.to_uppercase() != peer_name,
+                    OvhNodeFilter::Ovh => &&peer_name.to_uppercase() != peer_name,
                     _ => true,
                 })
             {
@@ -353,18 +354,18 @@ impl OvhData {
         output
     }
 
-    pub fn get_nb_ecmp_links(&self, ovh_nodes: Option<bool>) -> Vec<i8> {
+    pub fn get_nb_ecmp_links(&self, ovh_nodes: OvhNodeFilter) -> Vec<i8> {
         let mut output: Vec<i8> = Vec::with_capacity(self.data.len());
         for router in self.data.values().filter(|&r| match  ovh_nodes {
-            Some(true) => !r.is_external(),
-            Some(false) => r.is_external(),
-            None => true,
+            OvhNodeFilter::Ovh => !r.is_external(),
+            OvhNodeFilter::External => r.is_external(),
+            OvhNodeFilter::All => true,
         }) {
             for (_, peer_links) in router
                 .peers
                 .iter()
                 .filter(|(peer_name, _)| match ovh_nodes {
-                    Some(true) => !is_peer_from_name(peer_name),
+                    OvhNodeFilter::Ovh => !is_peer_from_name(peer_name),
                     _ => true,
                 })
             {
@@ -377,18 +378,18 @@ impl OvhData {
         output
     }
 
-    pub fn get_link_loads(&self, ovh_nodes: Option<bool>) -> Vec<i8> {
+    pub fn get_link_loads(&self, ovh_nodes: OvhNodeFilter) -> Vec<i8> {
         let mut output: Vec<i8> = Vec::with_capacity(self.data.len());
         for router in self.data.values().filter(|&r| match ovh_nodes {
-            Some(true) => !r.is_external(),
-            Some(false) => r.is_external(),
-            None => true,
+            OvhNodeFilter::Ovh => !r.is_external(),
+            OvhNodeFilter::External => r.is_external(),
+            OvhNodeFilter::All => true,
         }) {
             for (_, peer_links) in router
                 .peers
                 .iter()
                 .filter(|(peer_name, _)| match ovh_nodes {
-                    Some(true) => is_peer_from_name(peer_name),
+                    OvhNodeFilter::Ovh => is_peer_from_name(peer_name),
                     _ => true,
                 })
             {
@@ -521,16 +522,16 @@ pub fn aggregate_by_time(
 
 pub fn aggregate_ecmp_diff<'a>(
     aggr: &[(NaiveDate, Vec<&'a ExperimentResults>)],
-    ovh_nodes: Option<bool>,
+    ovh_nodes: OvhNodeFilter,
 ) -> Vec<Vec<&'a i8>> {
     aggr.iter()
         .map(|(_, one_aggr)| {
             one_aggr
                 .iter()
                 .map(|&exp| match ovh_nodes {
-                    Some(true) => &exp.ecmp_diffs_ovh,
-                    Some(false) => &exp.ecmp_diffs_external,
-                    None => &exp.ecmp_diffs,
+                    OvhNodeFilter::Ovh => &exp.ecmp_diffs_ovh,
+                    OvhNodeFilter::External => &exp.ecmp_diffs_external,
+                    OvhNodeFilter::All => &exp.ecmp_diffs,
                 })
                 .flatten()
                 .collect::<Vec<&i8>>()
@@ -542,7 +543,7 @@ pub fn write_csv_ecmp_aggregated(
     aggr: &[(NaiveDate, Vec<&ExperimentResults>)],
     wrt: &mut Writer<File>,
     wrt_total: &mut Writer<File>,
-    ovh_nodes: Option<bool>,
+    ovh_nodes: OvhNodeFilter,
     ranges: &[i8],
 ) -> Result<(), csv::Error> {
     let aggr_ecmp = aggregate_ecmp_diff(aggr, ovh_nodes);

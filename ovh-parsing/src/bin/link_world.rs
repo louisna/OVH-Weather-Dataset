@@ -1,7 +1,7 @@
 use core::panic;
 use std::{env, collections::HashMap};
 use chrono::NaiveDateTime;
-use ovh_parsing::{parse_yaml, OvhData, Router};
+use ovh_parsing::{parse_yaml, OvhData, Router, OvhNodeFilter};
 
 fn try_and_connect_network(europe: OvhData, america: OvhData, asia: OvhData, world_data: OvhData) -> Option<OvhData> {
     let mut total: HashMap<String, Router> = HashMap::new();
@@ -51,40 +51,40 @@ fn main() {
     let asia_data = parse_yaml(&args[3], NaiveDateTime::from_timestamp(100, 100)).unwrap();
     let world_data = parse_yaml(&args[4], NaiveDateTime::from_timestamp(100, 100)).unwrap();
 
-    println!("Europe number of links: {}", europe_data.get_nb_links(None));
-    println!("Europe number of OVH links: {}", europe_data.get_nb_links(Some(true)));
-    println!("Europe number of external links: {}", europe_data.get_nb_links(Some(false)));
+    println!("Europe number of links: {}", europe_data.get_nb_links(OvhNodeFilter::All));
+    println!("Europe number of OVH links: {}", europe_data.get_nb_links(OvhNodeFilter::Ovh));
+    println!("Europe number of external links: {}", europe_data.get_nb_links(OvhNodeFilter::External));
 
-    println!("Europe number of nodes: {}", europe_data.get_nb_nodes(None));
-    println!("Europe number of OVH nodes: {}", europe_data.get_nb_nodes(Some(true)));
-    println!("Europe number of external nodes: {}", europe_data.get_nb_nodes(Some(false)));
+    println!("Europe number of nodes: {}", europe_data.get_nb_nodes(OvhNodeFilter::All));
+    println!("Europe number of OVH nodes: {}", europe_data.get_nb_nodes(OvhNodeFilter::Ovh));
+    println!("Europe number of external nodes: {}", europe_data.get_nb_nodes(OvhNodeFilter::External));
     println!();
 
-    println!("America number of links: {}", america_data.get_nb_links(None));
-    println!("America number of OVH links: {}", america_data.get_nb_links(Some(true)));
-    println!("America number of external links: {}", america_data.get_nb_links(Some(false)));
+    println!("America number of links: {}", america_data.get_nb_links(OvhNodeFilter::All));
+    println!("America number of OVH links: {}", america_data.get_nb_links(OvhNodeFilter::Ovh));
+    println!("America number of external links: {}", america_data.get_nb_links(OvhNodeFilter::External));
 
-    println!("America number of nodes: {}", america_data.get_nb_nodes(None));
-    println!("America number of OVH nodes: {}", america_data.get_nb_nodes(Some(true)));
-    println!("America number of external nodes: {}", america_data.get_nb_nodes(Some(false)));
+    println!("America number of nodes: {}", america_data.get_nb_nodes(OvhNodeFilter::All));
+    println!("America number of OVH nodes: {}", america_data.get_nb_nodes(OvhNodeFilter::Ovh));
+    println!("America number of external nodes: {}", america_data.get_nb_nodes(OvhNodeFilter::External));
     println!();
 
-    println!("Asia number of links: {}", asia_data.get_nb_links(None));
-    println!("Asia number of OVH links: {}", asia_data.get_nb_links(Some(true)));
-    println!("Asia number of external links: {}", asia_data.get_nb_links(Some(false)));
+    println!("Asia number of links: {}", asia_data.get_nb_links(OvhNodeFilter::All));
+    println!("Asia number of OVH links: {}", asia_data.get_nb_links(OvhNodeFilter::Ovh));
+    println!("Asia number of external links: {}", asia_data.get_nb_links(OvhNodeFilter::External));
 
-    println!("Asia number of nodes: {}", asia_data.get_nb_nodes(None));
-    println!("Asia number of OVH nodes: {}", asia_data.get_nb_nodes(Some(true)));
-    println!("Asia number of external nodes: {}", asia_data.get_nb_nodes(Some(false)));
+    println!("Asia number of nodes: {}", asia_data.get_nb_nodes(OvhNodeFilter::All));
+    println!("Asia number of OVH nodes: {}", asia_data.get_nb_nodes(OvhNodeFilter::Ovh));
+    println!("Asia number of external nodes: {}", asia_data.get_nb_nodes(OvhNodeFilter::External));
     println!();
 
-    println!("World number of links: {}", world_data.get_nb_links(None));
-    println!("World number of OVH links: {}", world_data.get_nb_links(Some(true)));
-    println!("World number of external links: {}", world_data.get_nb_links(Some(false)));
+    println!("World number of links: {}", world_data.get_nb_links(OvhNodeFilter::All));
+    println!("World number of OVH links: {}", world_data.get_nb_links(OvhNodeFilter::Ovh));
+    println!("World number of external links: {}", world_data.get_nb_links(OvhNodeFilter::External));
 
-    println!("World number of nodes: {}", world_data.get_nb_nodes(None));
-    println!("World number of OVH nodes: {}", world_data.get_nb_nodes(Some(true)));
-    println!("World number of external nodes: {}", world_data.get_nb_nodes(Some(false)));
+    println!("World number of nodes: {}", world_data.get_nb_nodes(OvhNodeFilter::All));
+    println!("World number of OVH nodes: {}", world_data.get_nb_nodes(OvhNodeFilter::Ovh));
+    println!("World number of external nodes: {}", world_data.get_nb_nodes(OvhNodeFilter::External));
     println!();
 
     let total = match try_and_connect_network(europe_data, america_data, asia_data, world_data) {
@@ -93,12 +93,12 @@ fn main() {
     };
 
     // Do whatever you want with the data
-    println!("Total number of nodes: {}", total.get_nb_nodes(None));
-    println!("Total number of OVH nodes: {}", total.get_nb_nodes(Some(true)));
-    println!("Total number of external nodes: {}", total.get_nb_nodes(Some(false)));
+    println!("Total number of nodes: {}", total.get_nb_nodes(OvhNodeFilter::All));
+    println!("Total number of OVH nodes: {}", total.get_nb_nodes(OvhNodeFilter::Ovh));
+    println!("Total number of external nodes: {}", total.get_nb_nodes(OvhNodeFilter::External));
     
-    println!("Total number of links: {}", total.get_nb_links(None));
-    println!("Total number of OVH links: {}", total.get_nb_links(Some(true)));
-    println!("Total number of external links: {}", total.get_nb_links(Some(false)));
+    println!("Total number of links: {}", total.get_nb_links(OvhNodeFilter::All));
+    println!("Total number of OVH links: {}", total.get_nb_links(OvhNodeFilter::Ovh));
+    println!("Total number of external links: {}", total.get_nb_links(OvhNodeFilter::External));
 
 }

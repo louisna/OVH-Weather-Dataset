@@ -2,7 +2,7 @@
 // Date: 11/05/2022
 
 use indicatif::ProgressBar;
-use ovh_parsing::{parse_yaml, ExperimentResults, FileMetadata};
+use ovh_parsing::{parse_yaml, ExperimentResults, FileMetadata, OvhNodeFilter};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use threadpool::ThreadPool;
@@ -19,20 +19,20 @@ pub fn multithread_parsing(files: &[&FileMetadata], nb_threads: usize) -> Vec<Ex
         let timestamp = file.timestamp;
         pool.execute(move || {
             if let Some(val) = parse_yaml(&s, timestamp) {
-                let nb_nodes = val.get_nb_nodes(None);
-                let nb_nodes_ovh = val.get_nb_nodes(Some(true));
-                let nb_nodes_external = val.get_nb_nodes(Some(false));
-                let nb_links = val.get_nb_links(None);
-                let nb_links_external = val.get_nb_links(Some(false));
-                let ecmp_diffs = val.get_ecmp_imbalance(None);
-                let ecmp_diffs_ovh = val.get_ecmp_imbalance(Some(true));
-                let ecmp_diffs_external = val.get_ecmp_imbalance(Some(false));
-                let loads = val.get_link_loads(None);
-                let loads_ovh = val.get_link_loads(Some(true));
-                let loads_external = val.get_link_loads(Some(false));
-                let nb_ecmp_links = val.get_nb_ecmp_links(None);
-                let nb_ecmp_links_ovh = val.get_nb_ecmp_links(Some(true));
-                let nb_ecmp_links_external = val.get_nb_ecmp_links(Some(false));
+                let nb_nodes = val.get_nb_nodes(OvhNodeFilter::All);
+                let nb_nodes_ovh = val.get_nb_nodes(OvhNodeFilter::Ovh);
+                let nb_nodes_external = val.get_nb_nodes(OvhNodeFilter::External);
+                let nb_links = val.get_nb_links(OvhNodeFilter::All);
+                let nb_links_external = val.get_nb_links(OvhNodeFilter::External);
+                let ecmp_diffs = val.get_ecmp_imbalance(OvhNodeFilter::All);
+                let ecmp_diffs_ovh = val.get_ecmp_imbalance(OvhNodeFilter::Ovh);
+                let ecmp_diffs_external = val.get_ecmp_imbalance(OvhNodeFilter::External);
+                let loads = val.get_link_loads(OvhNodeFilter::All);
+                let loads_ovh = val.get_link_loads(OvhNodeFilter::Ovh);
+                let loads_external = val.get_link_loads(OvhNodeFilter::External);
+                let nb_ecmp_links = val.get_nb_ecmp_links(OvhNodeFilter::All);
+                let nb_ecmp_links_ovh = val.get_nb_ecmp_links(OvhNodeFilter::Ovh);
+                let nb_ecmp_links_external = val.get_nb_ecmp_links(OvhNodeFilter::External);
                 // Easier, because we should divide by two for internal links, but by 1
                 // for peering links.
                 let nb_links_ovh = nb_links - nb_links_external;

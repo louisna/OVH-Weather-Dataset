@@ -4,7 +4,7 @@
 use chrono::Duration;
 use csv::{Writer, WriterBuilder};
 // use indicatif::ProgressBar;
-use ovh_parsing::{aggregate_by_time, write_csv_ecmp_aggregated, ExperimentResults, FileMetadata};
+use ovh_parsing::{aggregate_by_time, write_csv_ecmp_aggregated, ExperimentResults, FileMetadata, OvhNodeFilter};
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
@@ -170,12 +170,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let all_results = multithread_parsing(&files_selected, args.nb_threads as usize);
     let all_writers = [
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, None),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(true)),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, Some(false)),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, None),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, Some(true)),
-        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, Some(false)),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, OvhNodeFilter::All),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, OvhNodeFilter::Ovh),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_nodes(wrt, OvhNodeFilter::External),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, OvhNodeFilter::All),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, OvhNodeFilter::Ovh),
+        |x: &ExperimentResults, wrt: &mut Writer<File>| x.write_csv_nb_links(wrt, OvhNodeFilter::External),
     ];
 
     let all_filenames = [
@@ -210,7 +210,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         |x: &str| format!("ecmp-agg-{}-external.csv", x),
     ];
 
-    let all_routers_options = [None, Some(true), Some(false)];
+    let all_routers_options = [OvhNodeFilter::All, OvhNodeFilter::Ovh, OvhNodeFilter::External];
 
     for (filename, option) in all_ecmp_imbalance_files
         .iter()
@@ -233,9 +233,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     if args.enable_full_load {
         // ECMP full loads
         let all_writers_yaml = [
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, None),
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(true)),
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, Some(false)),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, OvhNodeFilter::All),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, OvhNodeFilter::Ovh),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_ecmp_diff(wrt, OvhNodeFilter::External),
         ];
 
         // YAML parsing for all ECMP diffs
@@ -254,9 +254,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         let all_writers_yaml_loads = [
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, None),
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, Some(true)),
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, Some(false)),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, OvhNodeFilter::All),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, OvhNodeFilter::Ovh),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_load(wrt, OvhNodeFilter::External),
         ];
 
         let all_filenames_yaml_load = ["loads-all.yaml", "loads-ovh.yaml", "loads-external.yaml"];
@@ -271,9 +271,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // Nb ECMP links
         let all_writers_yaml = [
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, None),
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, Some(true)),
-            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, Some(false)),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, OvhNodeFilter::All),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, OvhNodeFilter::Ovh),
+            |x: &ExperimentResults, wrt: &mut File| x.write_yaml_nb_ecmp_links(wrt, OvhNodeFilter::External),
         ];
 
         // YAML parsing for all ECMP diffs

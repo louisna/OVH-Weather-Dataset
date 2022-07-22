@@ -238,6 +238,7 @@ impl ExperimentResults {
     }
 }
 
+#[derive(Debug)]
 pub struct OvhData {
     pub timestamp: NaiveDateTime,
     pub data: HashMap<String, Router>,

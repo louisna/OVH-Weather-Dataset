@@ -62,7 +62,7 @@ fn is_peer_from_name(name: &str) -> bool {
         str_split[0].to_uppercase() == str_split[0]
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Link {
     pub label: String,
     pub load: u32,

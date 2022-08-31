@@ -36,7 +36,11 @@ impl FileMetadata {
         .split(&['_', '.'][..])
         .collect::<Vec<&str>>()[1];
 
-        let timestamp = timestamp_str.parse::<i64>().unwrap();
+        
+        let timestamp = match timestamp_str.parse::<i64>() {
+            Ok(t) => t,
+            Err(_) => return None,
+        };
 
         Some(FileMetadata {
             filepath: pathbuf.to_str().unwrap().to_string(),
@@ -407,7 +411,13 @@ impl OvhData {
 /// my *very few* skills in Rust
 pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
     let fd = std::fs::File::open(filepath).unwrap();
-    let document: Value = from_reader(fd).unwrap();
+    let document: Value = match from_reader(fd) {
+        Ok(doc) => doc,
+        Err(err) => {
+            println!("Error on {}: {:?}", filepath, err);
+            return None;
+        },
+    };
     let mut routers: HashMap<String, Router> = HashMap::new();
     for router in document.as_mapping().unwrap() {
         let router_name = router.0.as_str().unwrap();

@@ -29,8 +29,3 @@ def read_yaml(filepath: str) -> dict[str, "Router"]:
         all_routers[router_name] = router
     
     return all_routers
-
-
-if __name__ == "__main__":
-    data = read_yaml("/Users/louisnavarre/Documents/Github/OVH-Analysis/data_september_yaml/weathermap_1630901711.yaml")
-    print(data)

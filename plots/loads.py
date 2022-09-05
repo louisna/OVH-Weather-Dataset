@@ -10,6 +10,7 @@ from Utils_Benoit import *
 from tqdm import tqdm
 import matplotlib.dates as mdates
 import pickle
+import numpy as np
 
 
 def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
@@ -151,7 +152,9 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
             all_data_aggregated.append(aggregate_week_day_hours(x, d))
         keys = all_data_aggregated[0].keys()
         sorted(keys)
-        max_values = [max(all_data_aggregated[0][i]) for i in keys]
+        max_values = [np.percentile(all_data_aggregated[0][i], 99.99) for i in keys]
+        for i, day in enumerate(keys):
+            print(f"For hour {i}, number of samples: {len(all_data_aggregated[0][day])}, and number of values in the 99.99th percentile: {len(all_data_aggregated[0][day]) * (1.0 - 0.9999)}")
         all_data = cbook.boxplot_stats(all_data_aggregated[0].values(), labels=all_data_aggregated[0].keys(), whis=(1, 99))
         with open(pickle_filename, "wb+") as fd:
             pickle.dump((all_data, all_x, max_values), fd)

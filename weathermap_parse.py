@@ -1,4 +1,5 @@
 import os
+import sys
 import dataclasses
 from typing import List
 from copy import deepcopy, copy
@@ -11,8 +12,9 @@ from multiprocessing import Pool
 
 
 # Global params
-directory = "/Users/louisnavarre/Documents/Github/OVH/test_parsing/svg"
-ALL_YAML_ALREADY = [int(i[:-5].split("_")[1]) for i in os.listdir(f"{directory}_yaml")]
+directory = "/home/lnavarre/aug"
+ALL_YAML_ALREADY = None
+yaml_directory = None
 
 
 @dataclasses.dataclass
@@ -163,8 +165,8 @@ def parse(filepath):
         labels_poly = {l: (l, l.poly(is_label=True)) for l in labels}
         for l in links:
             line = l.line()
-            intersecting_nodes = [n for n, p in nodes_poly if p.intersects(line)]
-            intersecting_labels = [n for n, p in labels_poly.values() if p.intersects(line)]
+            intersecting_nodes = [n for n, p in nodes_poly]# if p.distance(l.p1()) < 50.0 or p.distance(l.p2()) < 50.0]# if p.intersects(line) or p.distance(line) < 10]
+            intersecting_labels = [n for n, p in labels_poly.values()]# if p.distance(l.p1()) < 50.0 or p.distance(l.p2()) < 50.0]# if p.intersects(line) or p.distance(line) < 10]
             
             p1 = l.p1()
             intersecting_nodes = sorted(intersecting_nodes, key=lambda n: n.poly().distance(p1))
@@ -174,6 +176,7 @@ def parse(filepath):
             labels_poly.pop(l.lb1)
             lb1_b = l.lb1
             l.lb1 = l.lb1.name
+            l.n1.links.append(l)
 
             p2 = l.p2()
             l.n2 = sorted(intersecting_nodes, key=lambda n: n.poly().distance(p2))[0]
@@ -181,31 +184,12 @@ def parse(filepath):
             labels_poly.pop(l.lb2)
             lb2_b = l.lb2
             l.lb2 = l.lb2.name
-
-            # Differentiate each external peer that may occur with the same name in the SVG
-            if l.n1.name == l.n1.name.upper():  # Is external peer
-                external = copy(l.n1)  # Do not change other nodes
-                external.links = copy(l.n1.links)
-                external.name = external.name + "#" + l.n2.name
-                l.n1 = external
-                # Must add the node in "nodes" because it is considered as a new node now
-                nodes.append(external)
-            # Same but if we talk about the second node
-            if l.n2.name == l.n2.name.upper():  # Is external peer
-                external = copy(l.n2)  # Do not change other nodes
-                external.links = copy(l.n2.links)
-                external.name = external.name + "#" + l.n1.name
-                l.n2 = external
-                # Must add the node in "nodes" because it is considered as a new node now
-                nodes.append(external)
-            
-            l.n1.links.append(l)
             l.n2.links.append(l.reverse())
 
             dist_lb_l = lb2_b.poly().distance(p2) - lb1_b.poly().distance(p1)
             if abs(dist_lb_l) > 100:
                 print("Distance is too big:", dist_lb_l)
-                print(f"Linked the two following routers: {l.n1.name} -- {l.n2.name}")
+                print(f"Linked the two following routers: {l.n1.name} -- {l.n2.name}")
                 print(f"Location of the first label: x={lb1_b.x} y={lb1_b.y} h={lb1_b.h} w={lb1_b.w}")
                 print(f"Location of the secon label: x={lb2_b.x} y={lb2_b.y} h={lb2_b.h} w={lb2_b.w}")
                 print(f"Form of the line: ({l.x1}, {l.y1}), ({l.x2}, {l.y2})")
@@ -219,26 +203,30 @@ def parse(filepath):
 
         output_yaml = {}
         for n in nodes:
-            if n.name == n.name.upper():
-                # Sanity check : no link is attributed to this node because we will remove it
-                if len(n.links) != 0:
-                    print(n.name)
-                assert len(n.links) == 0
-                continue  # Do not add the original node here
             if n.name not in output_yaml.keys():
                 output_yaml[n.name] = {'links': []}
             for l in n.links:
                 output_yaml[n.name]['links'].append({'label': l.lb1, 'load': l.ld1, 'peer': l.n2.name})
 
         file_post = filepath.split("/")[-1]
-        with open(f"{directory}_yaml/{file_post[:-4]}.yaml", 'w+') as f:
+        
+        # Sanity check: each router should at least have a link. Empirically we see that no router is isolated in the network
+        for n in nodes:
+            assert(len(n.links) > 0)
+        
+        with open(f"{yaml_directory}/{file_post[:-4]}.yaml", 'w+') as f:
             yaml.dump(output_yaml, f)
 
 
 if __name__ == "__main__":
-    os.makedirs(f"{directory}_yaml", exist_ok=True)
+    if len(sys.argv) > 1:
+        directory = sys.argv[1]
+        if yaml_directory is None:
+            yaml_directory = f"{directory}_yaml"
+    os.makedirs(yaml_directory, exist_ok=True)
+    ALL_YAML_ALREADY = [int(i[:-5].split("_")[1]) for i in os.listdir(yaml_directory)]
     print(ALL_YAML_ALREADY)
     all_files = os.listdir(directory)
-    #with Pool(processes=1) as pool:
-    #    pool.map(parse, all_files)
-    parse(all_files[0])
+    with Pool(processes=16) as pool:
+        pool.map(parse, all_files)
+    # parse(all_files[0])

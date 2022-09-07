@@ -9,13 +9,10 @@ from bs4 import BeautifulSoup
 from shapely.geometry import Polygon, LineString, Point
 
 from multiprocessing import Pool
+import tqdm
 
-
-# Global params
-directory = "/home/lnavarre/aug"
-ALL_YAML_ALREADY = None
-yaml_directory = None
-
+import cchardet
+import gc
 
 @dataclasses.dataclass
 class Node:
@@ -103,13 +100,12 @@ class Link:
 def parse(filepath):
     the_only_filename = int(filepath.split("/")[-1].split("_")[1][:-4])
     if the_only_filename in ALL_YAML_ALREADY: 
-        print("YAYKs")
+        print("Already parsed")
         return
     filepath = os.path.join(directory, filepath)
-    print(filepath)
     with open(filepath) as fd:
         svg = "".join(fd.readlines())
-        weathermap = BeautifulSoup(svg, 'html.parser')
+        weathermap = BeautifulSoup(svg, 'lxml')
 
         links = []
         nodes = []
@@ -165,22 +161,22 @@ def parse(filepath):
         labels_poly = {l: (l, l.poly(is_label=True)) for l in labels}
         for l in links:
             line = l.line()
-            intersecting_nodes = [n for n, p in nodes_poly]# if p.distance(l.p1()) < 50.0 or p.distance(l.p2()) < 50.0]# if p.intersects(line) or p.distance(line) < 10]
-            intersecting_labels = [n for n, p in labels_poly.values()]# if p.distance(l.p1()) < 50.0 or p.distance(l.p2()) < 50.0]# if p.intersects(line) or p.distance(line) < 10]
+            intersecting_nodes = [(n, p) for n, p in nodes_poly]# if p.distance(l.p1()) < 50.0 or p.distance(l.p2()) < 50.0]# if p.intersects(line) or p.distance(line) < 10]
+            intersecting_labels = [(n, p) for n, p in labels_poly.values()]# if p.distance(l.p1()) < 50.0 or p.distance(l.p2()) < 50.0]# if p.intersects(line) or p.distance(line) < 10]
             
             p1 = l.p1()
-            intersecting_nodes = sorted(intersecting_nodes, key=lambda n: n.poly().distance(p1))
-            l.n1 = intersecting_nodes.pop(0)
-            intersecting_labels = sorted(intersecting_labels, key=lambda n: n.poly().distance(p1))
-            l.lb1 = intersecting_labels.pop(0)
+            intersecting_nodes = sorted(intersecting_nodes, key=lambda x: x[1].distance(p1))
+            l.n1 = intersecting_nodes.pop(0)[0]
+            intersecting_labels = sorted(intersecting_labels, key=lambda x: x[1].distance(p1))
+            l.lb1 = intersecting_labels.pop(0)[0]
             labels_poly.pop(l.lb1)
             lb1_b = l.lb1
             l.lb1 = l.lb1.name
             l.n1.links.append(l)
 
             p2 = l.p2()
-            l.n2 = sorted(intersecting_nodes, key=lambda n: n.poly().distance(p2))[0]
-            l.lb2 = sorted(intersecting_labels, key=lambda n: n.poly().distance(p2))[0]
+            l.n2 = sorted(intersecting_nodes, key=lambda x: x[1].distance(p2))[0][0]
+            l.lb2 = sorted(intersecting_labels, key=lambda x: x[1].distance(p2))[0][0]
             labels_poly.pop(l.lb2)
             lb2_b = l.lb2
             l.lb2 = l.lb2.name
@@ -216,17 +212,30 @@ def parse(filepath):
         
         with open(f"{yaml_directory}/{file_post[:-4]}.yaml", 'w+') as f:
             yaml.dump(output_yaml, f)
+        
+        gc.collect()
 
+
+def safe_parse(filepath):
+    try:
+        parse(filepath)
+    except Exception as e:
+        import traceback
+        print("Unable to parse", filepath, "with exception", e)
+        traceback.print_exc()
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        directory = sys.argv[1]
-        if yaml_directory is None:
-            yaml_directory = f"{directory}_yaml"
+    directory = sys.argv[1].rstrip(os.path.sep)
+    yaml_directory = f"{directory}_yaml"
     os.makedirs(yaml_directory, exist_ok=True)
-    ALL_YAML_ALREADY = [int(i[:-5].split("_")[1]) for i in os.listdir(yaml_directory)]
-    print(ALL_YAML_ALREADY)
+    ALL_YAML_ALREADY = {int(i[:-5].split("_")[1]) for i in os.listdir(yaml_directory)}
     all_files = os.listdir(directory)
-    with Pool(processes=16) as pool:
-        pool.map(parse, all_files)
-    # parse(all_files[0])
+    files_to_process = []
+    for rf, filepath in [(int(filepath.split("/")[-1].split("_")[1][:-4]), filepath) for filepath in all_files]:
+        if rf not in ALL_YAML_ALREADY:
+            files_to_process.append(filepath)
+
+    with Pool(processes=24) as pool:
+        for _ in tqdm.tqdm(pool.imap_unordered(safe_parse, files_to_process), total=len(files_to_process)):
+            pass
+    #safe_parse(files_to_process[0])

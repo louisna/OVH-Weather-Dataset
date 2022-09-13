@@ -13,3 +13,5 @@ ovh-parsing/Cargo.lock
 .DS_Store
 
 __pycache*
+
+venv/

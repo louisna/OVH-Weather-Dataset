@@ -11,6 +11,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 use std::{cmp, collections::HashMap, path::Path};
+pub mod get_files;
 
 #[derive(Debug)]
 pub struct FileMetadata {
@@ -65,7 +66,7 @@ fn is_peer_from_name(name: &str) -> bool {
     str_split[0].to_uppercase() == str_split[0]
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Link {
     pub label: String,
     pub load: u32,

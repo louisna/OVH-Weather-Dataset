@@ -28,12 +28,12 @@ import csv
 from utils import *
 
 
-rc('text', usetex=True)
-rc('font',family='Times New Roman')
-rc('xtick', labelsize='40')
-rc('ytick', labelsize='40')
-rc('lines', markersize=5)
-rc('legend', numpoints=1)
+plt.rc('text', usetex=True)
+plt.rc('font',family='Times New Roman')
+plt.rc('xtick', labelsize='40')
+plt.rc('ytick', labelsize='40')
+plt.rc('lines', markersize=5)
+plt.rc('legend', numpoints=1)
 
 """
 Font dictionary.

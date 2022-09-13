@@ -8,6 +8,7 @@ __date__    = "12/05/2022"
 
 from datetime import timedelta
 from Utils_Benoit import *
+from matplotlib.ticker import MaxNLocator
 
 def plot_node_degree(csv_files, labels, output):
     """
@@ -34,7 +35,7 @@ def plot_node_degree(csv_files, labels, output):
         max_data = max(max_data, max(data))
 
     #create figure
-    fig = figure(figsize=(6.4, 4.0))
+    fig = plt.figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
@@ -59,7 +60,7 @@ def plot_node_degree(csv_files, labels, output):
     ax.legend().set_visible(False)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
 def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
     """
@@ -86,7 +87,7 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
             all_data.append(y)
 
     #create figure
-    fig = figure(figsize=(6.4, 4.0))
+    fig = plt.figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
@@ -115,14 +116,14 @@ def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
     fig.autofmt_xdate(ha="center")
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ylim(ymin, ymax)
+    plt.ylim(ymin, ymax)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
     if len(labels)==1:
         ax.legend().set_visible(False)
     else:
-        legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.023, 1.22), ncol=3, handlelength=2)
+        plt.legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.023, 1.22), ncol=3, handlelength=2)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')

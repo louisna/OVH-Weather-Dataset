@@ -33,17 +33,11 @@ def main(argv):
     ext = retrieve_extension(args.extension)
 
     if args.metric=="ECMP":
-        #plot_ecmp_imbalance("../csv/ecmp-agg-values-all.csv", "../csv/ecmp-agg-total-all.csv",
-        #                    "../figures/ecmp-imbalance."+ext)
-        #plot_ecmp_imbalance_time_series(["../csv_march_2022/ecmp-diffs-all.yaml"], "ECMP difference", "../figures/ecmp-ts-march-2022."+ext, 0, 20)
         plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-diffs-all.yaml", "../csv/ecmp-diffs-ovh.yaml", "../csv/ecmp-diffs-external.yaml"], ["All", "Internal", "External"], "ECMP imbalance (\%)", "../figures/ecmp-diff-cdf."+ext, (0, 10))
-        #plot_all_ecmp_imbalance_in_cdf(["../csv/ecmp-nb-links-all.yaml", "../csv/ecmp-nb-links-ovh.yaml", "../csv/ecmp-nb-links-external.yaml"], ["All", "Internal", "External"], "Nb ECMP links", "../figures/ecmp-nb-links-cdf."+ext, (0, 20))
 
     if args.metric == "LOADS":
-        # plot_load_time_series(["../csv_march_2022/loads-all.yaml"], "Links load", "../figures/load-ts-march-2022."+ext, 0, 100)
         plot_load_boxplot_week(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts."+ext, 0, 100)
         plot_all_loads_in_cdf(["../csv/loads-all.yaml", "../csv/loads-ovh.yaml", "../csv/loads-external.yaml"], ["All", "Internal", "External"], "CDF", "../figures/load-cdf."+ext)
-        # plot_one_boxplot_per_day(["../csv/loads-all.yaml"], "Links load (\%)", "../figures/load-ts-week."+ext, 0, 100)
 
     if args.metric=="Infrastructure":
         plot_infra_evol(["../csv/nb-nodes-ovh.csv"],
@@ -54,7 +48,6 @@ def main(argv):
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
-        # plot_timeline_dataset("../figures/timeline."+ext)
         plot_interval_dataset("../figures/files_distance."+ext)
 
     if args.metric == "Peering":

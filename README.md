@@ -24,9 +24,11 @@ The YAML parsed files can be loaded in memory for further analysis. As a startin
 
 Any contribution to extend this list is welcomed.
 
-## Analysing scripts from the paper
+## Analyzing scripts from the paper
 
-TODO
+The scripts used for the (basic) analysis of the OVH network based on the YAML files are available in the [`ovh-parsing` directory](ovh-parsing). More information can be found in the related [`README`](ovh-parsing/README.md).
+
+All the analyzing scripts are written in Rust and require the Cargo toolchain. The output files from the analysis are located in the [`csv` directory](csv/). The [`plots` directory](plots/) uses theses files to generates the Figures from the paper (which are located in [`figures`](figures/)).
 
 ## Cite this paper
 

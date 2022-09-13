@@ -36,7 +36,6 @@ impl FileMetadata {
         .split(&['_', '.'][..])
         .collect::<Vec<&str>>()[1];
 
-        
         let timestamp = match timestamp_str.parse::<i64>() {
             Ok(t) => t,
             Err(_) => return None,
@@ -63,7 +62,7 @@ pub fn write_in_csv<T: Serialize>(values: Vec<T>, filepath: &str) -> Result<(), 
 
 fn is_peer_from_name(name: &str) -> bool {
     let str_split: Vec<&str> = name.split('#').collect();
-        str_split[0].to_uppercase() == str_split[0]
+    str_split[0].to_uppercase() == str_split[0]
 }
 
 #[derive(Debug, Serialize)]
@@ -361,7 +360,7 @@ impl OvhData {
 
     pub fn get_nb_ecmp_links(&self, ovh_nodes: OvhNodeFilter) -> Vec<i8> {
         let mut output: Vec<i8> = Vec::with_capacity(self.data.len());
-        for router in self.data.values().filter(|&r| match  ovh_nodes {
+        for router in self.data.values().filter(|&r| match ovh_nodes {
             OvhNodeFilter::Ovh => !r.is_external(),
             OvhNodeFilter::External => r.is_external(),
             OvhNodeFilter::All => true,
@@ -398,8 +397,10 @@ impl OvhData {
                     _ => true,
                 })
             {
-                peer_links.iter().filter(|&link| link.load > 1).for_each(|link| output.push(link.load as i8));
-
+                peer_links
+                    .iter()
+                    .filter(|&link| link.load > 1)
+                    .for_each(|link| output.push(link.load as i8));
             }
         }
 
@@ -416,7 +417,7 @@ pub fn parse_yaml(filepath: &str, timestamp: NaiveDateTime) -> Option<OvhData> {
         Err(err) => {
             println!("Error on {}: {:?}", filepath, err);
             return None;
-        },
+        }
     };
     let mut routers: HashMap<String, Router> = HashMap::new();
     for router in document.as_mapping().unwrap() {
@@ -539,12 +540,11 @@ pub fn aggregate_ecmp_diff<'a>(
         .map(|(_, one_aggr)| {
             one_aggr
                 .iter()
-                .map(|&exp| match ovh_nodes {
+                .flat_map(|&exp| match ovh_nodes {
                     OvhNodeFilter::Ovh => &exp.ecmp_diffs_ovh,
                     OvhNodeFilter::External => &exp.ecmp_diffs_external,
                     OvhNodeFilter::All => &exp.ecmp_diffs,
                 })
-                .flatten()
                 .collect::<Vec<&i8>>()
         })
         .collect()

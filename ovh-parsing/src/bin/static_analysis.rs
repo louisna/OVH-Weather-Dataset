@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use ovh_parsing::{parse_yaml, write_in_csv, Link, Router, OvhData, OvhNodeFilter};
+use ovh_parsing::{parse_yaml, write_in_csv, Link, OvhData, OvhNodeFilter, Router};
 use std::env;
 use std::error::Error;
 
@@ -10,7 +10,10 @@ fn _static_node_degree(data: &[&Router], output_csv: &str) -> Result<(), Box<dyn
 }
 
 fn static_node_degree_with_ecmp(data: &[&Router], output_csv: &str) -> Result<(), Box<dyn Error>> {
-    let res: Vec<i32> = data.iter().map(|&router| router.peers.values().fold(0, |s, l| s + l.len() as i32)).collect();
+    let res: Vec<i32> = data
+        .iter()
+        .map(|&router| router.peers.values().fold(0, |s, l| s + l.len() as i32))
+        .collect();
 
     write_in_csv(res, output_csv)
 }
@@ -21,7 +24,8 @@ fn static_nb_ecmp_links_mean(data: &[&Router]) -> f64 {
             .peers
             .values()
             .map(|links| links.iter().filter(|link| link.load > 1).collect())
-            .filter(|links: &Vec<&Link>| links.len() > 1).collect();
+            .filter(|links: &Vec<&Link>| links.len() > 1)
+            .collect();
         let s2 = ecmp.iter().fold(0, |s, v| s + v.len()) as i32;
         (sum + s2, nb + ecmp.len() as i32)
     });
@@ -49,6 +53,12 @@ fn main() {
     let data_internal = data.get_internal_routers();
     static_node_degree_with_ecmp(&data_internal, "../csv/static_node_degree_internal.csv").unwrap();
 
-    println!("Mean number of links per ECMP: {}", static_nb_ecmp_links_mean(&data_internal));
-    println!("Mean number of links per ECMP without filtering: {}", static_nb_ecmp_total_mean(&data));
+    println!(
+        "Mean number of links per ECMP: {}",
+        static_nb_ecmp_links_mean(&data_internal)
+    );
+    println!(
+        "Mean number of links per ECMP without filtering: {}",
+        static_nb_ecmp_total_mean(&data)
+    );
 }

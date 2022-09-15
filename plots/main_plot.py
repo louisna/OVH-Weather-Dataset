@@ -48,7 +48,7 @@ def main(argv):
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
-        # plot_interval_dataset("../figures/files_distance."+ext)
+        plot_interval_dataset("../figures/files_distance."+ext)
         plot_timeline_dataset("../figures/timeline."+ext)
 
     if args.metric == "Peering":
@@ -56,3 +56,4 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+

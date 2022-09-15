@@ -105,13 +105,13 @@ def plot_timeline_dataset(output):
     ax.xaxis.set_minor_locator(mdates.MonthLocator())
     ax.grid(axis='x', which='major', linewidth=2)
     fig.autofmt_xdate(ha='center')
-    plt.xlim(datetime(2020, 6, 21), datetime(2022, 11, 1))
+    plt.xlim(datetime(2020, 6, 21), datetime(2022, 12, 1))
     handles, labels = ax.get_legend_handles_labels()
 
     #axis stuffs
     axis_aesthetic(ax)
     xticks_labs = ['2020-07','2020-10','2021-01','2021-04','2021-07','2021-10',
-                   '2022-01','2022-04', "2022-07"]
+                   '2022-01','2022-04', "2022-07", "2022-10"]
     ax.tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
     ax.set_xticklabels(xticks_labs, rotation=45)
 
@@ -119,3 +119,4 @@ def plot_timeline_dataset(output):
 
     #save figure
     plt.savefig(output, bbox_inches='tight')
+

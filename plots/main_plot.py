@@ -44,7 +44,7 @@ def main(argv):
         '\# Routers', [r"\textsc{OVH}"] , "../figures/nb-nodes-evolution."+ext, 108, 124)
         plot_infra_evol(["../csvCR/nb-links-all.csv", "../csvCR/nb-links-ovh.csv", "../csvCR/nb-links-external.csv"],
         '\# Links', ['All', 'Internal', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1100)
-        plot_node_degree(["../csvCR/static_node_degree_internal.csv"],
+        plot_node_degree(["../csv/static_node_degree_internal.csv"],
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":

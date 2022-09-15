@@ -270,7 +270,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
     for patch in bplot["boxes"]:
         patch.set_facecolor(colors[0])
     print(max_values)
-    plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
+    # plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
     # ax.set_xticklabels(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
     ax.set_xticklabels(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"])
 

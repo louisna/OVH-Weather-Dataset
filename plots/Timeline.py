@@ -42,7 +42,7 @@ def plot_interval_dataset(output):
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #load data
-    with open('../data_time_distances.yaml', 'r') as f:
+    with open('../csvCR/data_time_distances.yaml', 'r') as f:
         all_distances = yaml.load(f, Loader=Loader)
 
     #style
@@ -95,23 +95,23 @@ def plot_timeline_dataset(output):
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #load data
-    with open('../data_time_intervals.yaml', 'r') as f:
+    with open('../csvCR/data_time_intervals.yaml', 'r') as f:
         all_intervals = yaml.load(f, Loader=Loader)
 
     for (data_dir, intervals), c in reversed(list(zip(all_intervals.items(), colors))):
-        plt.hlines(y=[''.join(filter(str.isupper, maps[data_dir])) for _ in intervals], xmin=[datetime.datetime.fromtimestamp(a) for a, _ in intervals], xmax=[datetime.datetime.fromtimestamp(b) for _, b in intervals], color=c, label=maps[data_dir], linewidth=6)
+        plt.hlines(y=[''.join(filter(str.isupper, maps[data_dir])) for _ in intervals], xmin=[datetime.fromtimestamp(a) for a, _ in intervals], xmax=[datetime.fromtimestamp(b) for _, b in intervals], color=c, label=maps[data_dir], linewidth=6)
 
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
     ax.xaxis.set_minor_locator(mdates.MonthLocator())
     ax.grid(axis='x', which='major', linewidth=2)
     fig.autofmt_xdate(ha='center')
-    plt.xlim(datetime.datetime(2020, 6, 21), datetime.datetime.today())
+    plt.xlim(datetime(2020, 6, 21), datetime(2022, 11, 1))
     handles, labels = ax.get_legend_handles_labels()
 
     #axis stuffs
     axis_aesthetic(ax)
     xticks_labs = ['2020-07','2020-10','2021-01','2021-04','2021-07','2021-10',
-                   '2022-01','2022-04']
+                   '2022-01','2022-04', "2022-07"]
     ax.tick_params(axis='both', which='major', labelsize=FONT_SIZE_TICKS)
     ax.set_xticklabels(xticks_labs, rotation=45)
 

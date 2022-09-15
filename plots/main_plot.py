@@ -48,7 +48,8 @@ def main(argv):
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
-        plot_interval_dataset("../figures/files_distance."+ext)
+        # plot_interval_dataset("../figures/files_distance."+ext)
+        plot_timeline_dataset("../figures/timeline."+ext)
 
     if args.metric == "Peering":
         plot_peering_db_example(["../csvCR/AMS-IX_ams-5-n7.csv"], "../figures/peering-db-example."+ext)

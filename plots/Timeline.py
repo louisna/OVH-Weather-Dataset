@@ -16,6 +16,7 @@ except ImportError:
     from yaml import Loader, Dumper
 
 from Utils_Benoit import *
+from matplotlib.ticker import ScalarFormatter
 
 INTERVAL_DIST = 6 * 60
 all_intervals = {}
@@ -37,7 +38,7 @@ def plot_interval_dataset(output):
         output: output filename
     """
     #create figure
-    fig = figure(figsize=(8,4))
+    fig = plt.figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #load data
@@ -76,11 +77,11 @@ def plot_interval_dataset(output):
     plt.xlim(250, 60*60*4)
     plt.ylim(0.00001, 0.99999)
 
-    legend(fontsize=FONT_SIZE_LEGEND, handlelength=3, ncol=2, loc='lower right')
+    plt.legend(fontsize=FONT_SIZE_LEGEND, handlelength=3, ncol=2, loc='lower right')
     ax.grid(True, color='gray', linestyle='dashed')
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
 def plot_timeline_dataset(output):
     """
@@ -90,7 +91,7 @@ def plot_timeline_dataset(output):
         output: output filename
     """
     #create figure
-    fig = figure(figsize=(12,3))
+    fig = plt.figure(figsize=(12,3))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #load data
@@ -117,4 +118,4 @@ def plot_timeline_dataset(output):
     plt.legend(handles[::-1], labels[::-1], bbox_to_anchor=(0.95, 1.3), ncol=4, fontsize=FONT_SIZE_LEGEND)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')

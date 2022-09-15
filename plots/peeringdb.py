@@ -6,7 +6,7 @@ from Utils_Benoit import *
 i = 211
 for peering in ["AMS-IX_ams-1-n7", "AMS-IX_ams-5-n7"]:
     ax = plt.subplot(i)
-    with open("../csv/%s.csv" % peering) as fd:
+    with open("../csvCR/%s.csv" % peering) as fd:
         first = True
         for row in csv.reader(fd):
             if first:

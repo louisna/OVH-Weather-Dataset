@@ -11,6 +11,8 @@ from tqdm import tqdm
 import matplotlib.dates as mdates
 import pickle
 import numpy as np
+from matplotlib.ticker import MaxNLocator
+from matplotlib import cbook
 
 
 def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
@@ -41,7 +43,7 @@ def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
         all_x.append(x)
         all_data.append(data_file)
 
-    fig = figure(figsize=(8,4))
+    fig = plt.figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
@@ -66,14 +68,14 @@ def plot_load_time_series(csv_files, ylabel, output, ymin, ymax):
     fig.autofmt_xdate(ha="center")
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ylim(ymin, ymax)
+    plt.ylim(ymin, ymax)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
+    plt.legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
 
 def timestamp_into_day(timestamp: int) -> int:
@@ -122,7 +124,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
     all_data = list()
     all_x = list()
 
-    pickle_filename = "../csv/loads.data"
+    pickle_filename = "../csvCR/loads.data"
     try:
         with open(pickle_filename, "rb") as pickle_fd:
             all_data, all_x, max_values = pickle.load(pickle_fd)
@@ -159,7 +161,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
         with open(pickle_filename, "wb+") as fd:
             pickle.dump((all_data, all_x, max_values), fd)
 
-    fig = figure(figsize=(6.4, 4.0))
+    fig = plt.figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
@@ -182,7 +184,7 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
         patch.set_facecolor(colors[0])
     #max_values = [max(i) for i in all_data.values()]
     print(max_values)
-    plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
+    # plt.scatter([i + 1 for i in x_value], max_values, color=colors[2], marker="^", s=60)
     ax.set_xticks(hours)
     ax.set_xticklabels(list(range(24))[::2])
 
@@ -191,14 +193,14 @@ def plot_load_boxplot_week(csv_files, ylabel, output, ymin, ymax):
     ax.set_xlabel(latex_label('Time (hour)'), font)
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ylim(ymin, ymax)
+    plt.ylim(ymin, ymax)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
     # legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
 
 def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
@@ -215,7 +217,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
     all_data = list()
     all_x = list()
 
-    pickle_filename = "../csv/loads_per_day.data"
+    pickle_filename = "../csvCR/loads_per_day.data"
     try:
         with open(pickle_filename, "rb") as pickle_fd:
             all_data, all_x, max_values = pickle.load(pickle_fd)
@@ -250,7 +252,7 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
         with open(pickle_filename, "wb+") as fd:
             pickle.dump((all_data, all_x, max_values), fd)
 
-    fig = figure(figsize=(8,4))
+    fig = plt.figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
@@ -277,15 +279,14 @@ def plot_one_boxplot_per_day(csv_files, ylabel, output, ymin, ymax):
     ax.set_xlabel(latex_label('Day of the week'), font)
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ylim(ymin, ymax)
+    plt.ylim(ymin, ymax)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
     # legend(fontsize=FONT_SIZE_LEGEND-4, bbox_to_anchor=(0.95, 1.1), ncol=3, handlelength=3)
 
     #save figure
-    savefig(output, bbox_inches='tight')
-
+    plt.savefig(output, bbox_inches='tight')
 
 def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
     """
@@ -331,7 +332,7 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
         max_data = max(max_data, max(data_file))
 
     # Create figure
-    fig = figure(figsize=(6.4, 4.0))
+    fig = plt.figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Style
@@ -349,14 +350,14 @@ def plot_all_loads_in_cdf(csv_files, labels, ylabel, output):
 
     ax.set_xticks(list(range(0, 101, 10)))
 
-    ylim(0, 1.01)
+    plt.ylim(0, 1.01)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.018, 1.21), ncol=3, handlelength=2)
+    plt.legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.018, 1.21), ncol=3, handlelength=2)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
     with open("../test_parsing/backup_load_cdf.txt", "w+") as fd:
         fd.write(f"{all_bins}\n{all_cdfs}")

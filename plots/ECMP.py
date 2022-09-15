@@ -10,6 +10,7 @@ from Utils_Benoit import *
 from matplotlib.colors import LogNorm, Normalize
 from tqdm import tqdm
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 empty_date_label=["","","","","","","","","","","","","","","","","","","","","","","","",""]
 yticklabels_heatmap = ['[0,1[','[1,2[','[2,3[','[3,4[','[4,5[','[5,6[','[6,7[','[7,100[']
@@ -97,7 +98,7 @@ def plot_ecmp_imbalance(values, total, output,figsize_x=24, figsize_y=15, cbar_c
 
     #ax[1].grid(True, color='gray', linestyle='dashed')
 
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
 
 def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
@@ -131,7 +132,7 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
         all_data.append(data_file)
 
     #create figure
-    fig = figure(figsize=(8,4))
+    fig = plt.figure(figsize=(8,4))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     #style
@@ -158,14 +159,14 @@ def plot_ecmp_imbalance_time_series(csv_files, ylabel, output, ymin, ymax):
     fig.autofmt_xdate(ha="center")
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ylim(ymin, ymax)
+    plt.ylim(ymin, ymax)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=4, bbox_to_anchor=(1.01, 1.1), ncol=4, handlelength=3, columnspacing=1)
+    plt.legend(fontsize=4, bbox_to_anchor=(1.01, 1.1), ncol=4, handlelength=3, columnspacing=1)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
 
 
 def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
@@ -204,7 +205,7 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
         max_data = max(max_data, max(data_file))
 
     # Create figure
-    fig = figure(figsize=(6.4, 4.0))
+    fig = plt.figure(figsize=(6.4, 4.0))
     ax = fig.add_axes([0.13, 0.13, 0.85, 0.83])
 
     # Style
@@ -222,11 +223,11 @@ def plot_all_ecmp_imbalance_in_cdf(csv_files, labels, xlabel, output, xlim):
 
     # ax.set_xticks(list(range(0, 101, 10)))
     ax.set_xlim(xlim)
-    ylim(0, 1.01)
+    plt.ylim(0, 1.01)
 
     ax.grid(True, color='gray', linestyle='dashed')
 
-    legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.018, 1.21), ncol=3, handlelength=2)
+    plt.legend(fontsize=FONT_SIZE_LEGEND, bbox_to_anchor=(1.018, 1.21), ncol=3, handlelength=2)
 
     #save figure
-    savefig(output, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')

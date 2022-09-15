@@ -33,7 +33,3 @@ All the analyzing scripts are written in Rust and require the Cargo toolchain. T
 ## Cite this paper
 
 TODO
-
-## Copyright
-
-Louis Navarre, UCLouvain. September, 2022.

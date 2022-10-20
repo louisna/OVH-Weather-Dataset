@@ -40,12 +40,13 @@ def main(argv):
         plot_all_loads_in_cdf(["../csvCR/loads-all.yaml", "../csvCR/loads-ovh.yaml", "../csvCR/loads-external.yaml"], ["All", "Internal", "External"], "CDF", "../figures/load-cdf."+ext)
 
     if args.metric=="Infrastructure":
-        plot_infra_evol(["../csvCR/nb-nodes-ovh.csv"],
-        '\# Routers', [r"\textsc{OVH}"] , "../figures/nb-nodes-evolution."+ext, 108, 124)
-        plot_infra_evol(["../csvCR/nb-links-all.csv", "../csvCR/nb-links-ovh.csv", "../csvCR/nb-links-external.csv"],
-        '\# Links', ['All', 'Internal', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1100)
-        plot_node_degree(["../csv/static_node_degree_internal.csv"],
-        [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
+        # plot_infra_evol(["../csvCR/nb-nodes-ovh.csv"],
+        # '\# Routers', [r"\textsc{OVH}"] , "../figures/nb-nodes-evolution."+ext, 108, 124)
+        # plot_infra_evol(["../csvCR/nb-links-all.csv", "../csvCR/nb-links-ovh.csv", "../csvCR/nb-links-external.csv"],
+        # '\# Links', ['All', 'Internal', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1100)
+        # plot_node_degree(["../csv/static_node_degree_internal.csv"],
+        # [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
+        plot_nb_link_and_node()
 
     if args.metric=="Timeline":
         plot_interval_dataset("../figures/files_distance."+ext)

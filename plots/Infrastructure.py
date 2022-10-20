@@ -62,6 +62,80 @@ def plot_node_degree(csv_files, labels, output):
     #save figure
     plt.savefig(output, bbox_inches='tight')
 
+
+def plot_nb_link_and_node():
+    def inner(csv_files):
+        all_data = list()
+        all_x = list()
+        for file in csv_files:
+            with open(file) as fd:
+                data = [i for i in csv.reader(fd)]
+                # Parse into x/y
+                x = [datetime.fromtimestamp(int(i[0])) for i in data]
+                y = [int(i[1]) for i in data]
+                all_x.append(x)
+                all_data.append(y)
+        return all_data, all_x
+    data_node, x_node = inner(["../csvCR/nb-nodes-ovh.csv"])
+    data_link, x_link = inner(["../csvCR/nb-links-all.csv", "../csvCR/nb-links-ovh.csv", "../csvCR/nb-links-external.csv"])
+    all_data_2 = [data_link, data_node]
+    all_x_2 = [x_link, x_node]
+
+    fig, axs = plt.subplots(2, sharex=True, figsize=(8, 5))
+    all_colors = ['#1b9e77','#d95f02','#7570b3']  # https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+    lstyles = ["solid", "dotted", "dashed"]
+    all_labels_2 = [
+        ['All', 'Internal', 'External'],
+        [r"\textsc{OVH}"],
+    ]
+    all_ylabels = ['\# Links', '\# Routers']
+    all_ymin = [100, 108]
+    all_ymax = [1000, 124]
+
+    #plot
+    for value_i in range(2):
+        all_x, all_data = all_x_2[value_i], all_data_2[value_i]
+        ax = axs[value_i]
+        labels = all_labels_2[value_i]
+        ymin = all_ymin[value_i]
+        ymax = all_ymax[value_i]
+        ylabel = all_ylabels[value_i]
+        colors = all_colors.copy()
+        if len(all_x) == 1:
+            colors[0] = colors[1]
+        for i, (x, y) in enumerate(zip(all_x, all_data)):
+            subx = []
+            suby = []
+            for (dt1, dt2), (y1, y2) in zip(zip(x[:-1], x[1:]), zip(y[:-1], y[1:])):
+                subx.append(dt1)
+                suby.append(y1)
+                if dt2 - dt1 > timedelta(hours=1):
+                    ax.plot(subx, suby, color=colors[i], lw=2, ls=linestyles[lstyles[0]]) # linestyle is kept the same otherwise gaps in the data can be mixed with linestyles
+                    subx = []
+                    suby = []
+            if subx and suby:
+                ax.plot(subx, suby, label=legend_label(labels[i]), color=colors[i], lw=2, ls=linestyles[lstyles[0]])
+
+        ax.set_ylabel(latex_label(ylabel), font)
+        ax.set_xlabel(latex_label('Time'), font)
+        fig.autofmt_xdate(ha="center")
+
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.ylim(ymin, ymax)
+
+        ax.grid(True, color='gray', linestyle='dashed')
+
+        if len(labels)==1:
+            ax.legend().set_visible(False)
+        else:
+            ax.legend(fontsize=15, bbox_to_anchor=(0.823, 1.3), ncol=3, handlelength=2)
+
+    #save figure
+    plt.savefig("../figures/imc-infra.pdf", bbox_inches='tight')
+
+
+
+
 def plot_infra_evol(csv_files, ylabel, labels, output, ymin, ymax):
     """
     Plots infrastructure (#nodes, #links) evolution over time

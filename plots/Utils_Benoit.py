@@ -30,8 +30,8 @@ from utils import *
 
 plt.rc('text', usetex=True)
 plt.rc('font',family='Times New Roman')
-plt.rc('xtick', labelsize='40')
-plt.rc('ytick', labelsize='40')
+plt.rc('xtick', labelsize='15')
+plt.rc('ytick', labelsize='15')
 plt.rc('lines', markersize=5)
 plt.rc('legend', numpoints=1)
 
@@ -41,8 +41,8 @@ Font dictionary.
 Used by (nearly) every plotting functions
 """
 
-FONT_SIZE = 40
-FONT_SIZE_TICKS = 30
+FONT_SIZE = 20
+FONT_SIZE_TICKS = 20
 FONT_SIZE_LEGEND = 20
 font = {
     'fontname'   : 'DejaVu Sans',

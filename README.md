@@ -32,6 +32,7 @@ All the analyzing scripts are written in Rust and require the Cargo toolchain. T
 
 ## Cite this paper
 
+```
 @inproceedings{piraux2022revealing,
   title={Revealing the evolution of a cloud provider through its network weather map},
   author={Piraux, Maxime and Navarre, Louis and Rybowski, Nicolas and Bonaventure, Olivier and Donnet, Benoit},
@@ -39,3 +40,4 @@ All the analyzing scripts are written in Rust and require the Cargo toolchain. T
   pages={298--304},
   year={2022}
 }
+```

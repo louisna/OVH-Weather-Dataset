@@ -96,6 +96,9 @@ class Link:
         l.y1, l.y2 = l.y2, l.y1
         return l
 
+    def __hash__(self):
+        return hash((self.x1, self.x2, self.y1, self.y2))
+
 
 def parse(filepath):
     the_only_filename = int(filepath.split("/")[-1].split("_")[1][:-4])
@@ -107,7 +110,7 @@ def parse(filepath):
         svg = "".join(fd.readlines())
         weathermap = BeautifulSoup(svg, 'lxml')
 
-        links = []
+        links = set()
         nodes = []
         labels = []
 
@@ -122,7 +125,8 @@ def parse(filepath):
                     elif l.ld2 is None:
                         l.ld2 = int(e.text[:-1])
                         assert l.ld2 >= 0 and l.ld2 <= 100
-                        links.append(l)
+                        if l not in links:  # Avoid duplicate lines
+                            links.add(l)
                         l = None
                 elif 'node' in e.get('class', []):
                     label.name = e.text
@@ -185,6 +189,7 @@ def parse(filepath):
             dist_lb_l = lb2_b.poly().distance(p2) - lb1_b.poly().distance(p1)
             if abs(dist_lb_l) > 100:
                 print("Distance is too big:", dist_lb_l)
+                print("Label name", lb2_b)
                 print(f"Linked the two following routers: {l.n1.name} -- {l.n2.name}")
                 print(f"Location of the first label: x={lb1_b.x} y={lb1_b.y} h={lb1_b.h} w={lb1_b.w}")
                 print(f"Location of the secon label: x={lb2_b.x} y={lb2_b.y} h={lb2_b.h} w={lb2_b.w}")

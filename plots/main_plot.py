@@ -44,14 +44,16 @@ def main(argv):
         '\# Routers', [r"\textsc{OVH}"] , "../figures/nb-nodes-evolution."+ext, 108, 124)
         plot_infra_evol(["../csvCR/nb-links-all.csv", "../csvCR/nb-links-ovh.csv", "../csvCR/nb-links-external.csv"],
         '\# Links', ['All', 'Internal', 'External'] , "../figures/nb-links-evolution."+ext, 100, 1100)
-        plot_node_degree(["../csvCR/static_node_degree_internal.csv"],
+        plot_node_degree(["../csv/static_node_degree_internal.csv"],
         [r"\textsc{OVH}"], "../figures/node-degree_09_05."+ext)
 
     if args.metric=="Timeline":
         plot_interval_dataset("../figures/files_distance."+ext)
+        plot_timeline_dataset("../figures/timeline."+ext)
 
     if args.metric == "Peering":
         plot_peering_db_example(["../csvCR/AMS-IX_ams-5-n7.csv"], "../figures/peering-db-example."+ext)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
